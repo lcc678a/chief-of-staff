@@ -16,7 +16,8 @@ async function ensureTasksDir(): Promise<void> {
 export async function readTasks(): Promise<Task[]> {
   try {
     const raw = await readFile(TASKS_FILE, "utf-8");
-    const parsed = JSON.parse(raw) as unknown;
+    const cleaned = raw.replace(/^\uFEFF/, "");
+    const parsed = JSON.parse(cleaned) as unknown;
     if (!Array.isArray(parsed)) {
       return [];
     }
