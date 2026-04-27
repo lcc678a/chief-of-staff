@@ -36,9 +36,11 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
   }
 
   const logs = await readLastLogLines(task.log_file ?? `.chief/logs/${task.id}.log`, 20);
+  const workerRoute = task.worker_route ?? "external";
   const provider = task.provider ?? "unknown";
   const model = task.model ?? "unknown";
   const pidText = task.pid ? ` · pid=${task.pid}` : "";
+  const resultText = task.result_file ? ` · result_file=${task.result_file}` : "";
   const tailLine =
     task.status === "done"
       ? ` · summary=${task.summary ?? "(empty)"}`
@@ -46,7 +48,7 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
         ? ` · error=${task.error ?? "(unknown)"}`
         : "";
 
-  return `**${task.id}** · \`${task.status}\` · provider=\`${provider}\` · model=\`${model}\`${pidText}${tailLine}
+  return `**${task.id}** · \`${task.status}\` · route=\`${workerRoute}\` · provider=\`${provider}\` · model=\`${model}\`${pidText}${resultText}${tailLine}
 
 <details>
 <summary>📜 最近日志（最后 20 行）</summary>

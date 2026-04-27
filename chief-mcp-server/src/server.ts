@@ -7,6 +7,11 @@ import { planTasks, planTasksInputSchema } from "./tools/plan_tasks.js";
 import { dispatchWorker, dispatchWorkerInputSchema } from "./tools/dispatch_worker.js";
 import { getWorkerStatus, getWorkerStatusInputSchema } from "./tools/get_worker_status.js";
 import { getWorkerSummary, getWorkerSummaryInputSchema } from "./tools/get_worker_summary.js";
+import {
+  prepareCursorAgentTask,
+  prepareCursorAgentTaskInputSchema
+} from "./tools/prepare_cursor_agent_task.js";
+import { submitWorkerResult, submitWorkerResultInputSchema } from "./tools/submit_worker_result.js";
 import { ensureDefaultConfigFile } from "./lib/config.js";
 
 function toJsonSchema(schema: ZodTypeAny): object {
@@ -47,6 +52,16 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "get_worker_summary",
         description: "Get final summary or error for a task",
         inputSchema: toJsonSchema(getWorkerSummaryInputSchema)
+      },
+      {
+        name: "prepare_cursor_agent_task",
+        description: "Prepare one pending task for Cursor Agent Worker handoff",
+        inputSchema: toJsonSchema(prepareCursorAgentTaskInputSchema)
+      },
+      {
+        name: "submit_worker_result",
+        description: "Submit Cursor Agent Worker execution result back to chief",
+        inputSchema: toJsonSchema(submitWorkerResultInputSchema)
       }
     ]
   };
@@ -68,6 +83,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       break;
     case "get_worker_summary":
       text = await getWorkerSummary(args);
+      break;
+    case "prepare_cursor_agent_task":
+      text = await prepareCursorAgentTask(args);
+      break;
+    case "submit_worker_result":
+      text = await submitWorkerResult(args);
       break;
     default:
       throw new Error(`Unknown tool: ${request.params.name}`);

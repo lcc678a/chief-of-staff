@@ -35,6 +35,7 @@ export async function dispatchWorker(rawInput: unknown): Promise<string> {
 
   await updateTask(input.task_id, {
     status: "running",
+    worker_route: "external",
     provider: providerName,
     model,
     started_at: new Date().toISOString(),

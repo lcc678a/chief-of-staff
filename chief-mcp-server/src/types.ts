@@ -1,10 +1,14 @@
 export type ModelLevel = "cheap" | "smart" | "genius";
-export type TaskStatus = "pending" | "running" | "done" | "failed";
+export type TaskStatus = "pending" | "running" | "waiting_for_cursor_agent" | "done" | "failed";
 
 export interface Task {
   id: string;
   description: string;
   model_level: ModelLevel;
+  worker_route?: "external" | "cursor_agent" | "host_assisted";
+  suggested_model?: string;
+  reported_model?: string;
+  result_file?: string;
   provider?: string;
   model?: string;
   status: TaskStatus;
