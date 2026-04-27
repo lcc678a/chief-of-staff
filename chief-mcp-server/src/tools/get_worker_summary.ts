@@ -14,9 +14,17 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
     return `Task ${input.task_id} not found.`;
   }
 
+  const provider = task.provider ?? "unknown";
+  const model = task.model ?? "unknown";
+  const header = `**${task.id}** · \`${task.status}\` · provider=\`${provider}\` · model=\`${model}\``;
+
   if (task.status !== "done") {
-    return `Task ${task.id} is not done yet (status: ${task.status}).`;
+    return `${header}
+
+Task ${task.id} is not done yet (status: ${task.status}).`;
   }
 
-  return task.summary ?? "";
+  return `${header}
+
+${task.summary ?? ""}`;
 }

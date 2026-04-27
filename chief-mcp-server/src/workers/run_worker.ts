@@ -53,6 +53,11 @@ async function main(): Promise<void> {
     const model = providerConfig.models[task.model_level];
     const provider = getProvider(providerName, config);
 
+    await updateTask(taskId, {
+      provider: providerName,
+      model
+    });
+
     await appendLog(absoluteLogFile, `provider=${provider.name}\nmodel=${model}\n\n`);
 
     const systemPrompt = [

@@ -5,6 +5,8 @@ export interface Task {
   id: string;
   description: string;
   model_level: ModelLevel;
+  provider?: string;
+  model?: string;
   status: TaskStatus;
   created_at: string;
   updated_at: string;
