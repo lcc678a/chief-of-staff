@@ -1,7 +1,6 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { z } from "zod";
 import type { ModelLevel, Task } from "../types.js";
+import { readTasks, writeTasks } from "../lib/tasks_store.js";
 
 const planTasksInputSchema = z.object({
   tasks: z.array(
@@ -31,29 +30,9 @@ function escapeMarkdownCell(value: string): string {
   return value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
 }
 
-async function readExistingTasks(tasksFilePath: string): Promise<Task[]> {
-  try {
-    const raw = await readFile(tasksFilePath, "utf-8");
-    const parsed = JSON.parse(raw) as unknown;
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-
-    return parsed as Task[];
-  } catch (error: unknown) {
-    if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") {
-      return [];
-    }
-
-    throw error;
-  }
-}
-
 export async function planTasks(rawInput: unknown): Promise<string> {
   const input: PlanTasksInput = planTasksInputSchema.parse(rawInput);
-
-  const tasksFilePath = path.join(process.cwd(), ".chief", "tasks.json");
-  const existingTasks = await readExistingTasks(tasksFilePath);
+  const existingTasks = await readTasks();
   const maxTaskNumber = existingTasks.reduce((max, task) => {
     const taskNumber = getTaskNumber(task.id);
     if (taskNumber === null) {
@@ -76,8 +55,7 @@ export async function planTasks(rawInput: unknown): Promise<string> {
     };
   });
 
-  await mkdir(path.dirname(tasksFilePath), { recursive: true });
-  await writeFile(tasksFilePath, JSON.stringify([...existingTasks, ...newTasks], null, 2), "utf-8");
+  await writeTasks([...existingTasks, ...newTasks]);
 
   const rows = newTasks
     .map((task) => `| ${task.id} | ${escapeMarkdownCell(task.description)} | ${task.model_level} |`)

@@ -1,8 +1,17 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import type { ZodTypeAny } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { planTasks, planTasksInputSchema } from "./tools/plan_tasks.js";
+import { dispatchWorker, dispatchWorkerInputSchema } from "./tools/dispatch_worker.js";
+import { getWorkerStatus, getWorkerStatusInputSchema } from "./tools/get_worker_status.js";
+import { getWorkerSummary, getWorkerSummaryInputSchema } from "./tools/get_worker_summary.js";
+import { ensureDefaultConfigFile } from "./lib/config.js";
+
+function toJsonSchema(schema: ZodTypeAny): object {
+  return zodToJsonSchema(schema, { target: "jsonSchema7" });
+}
 
 const server = new Server(
   {
@@ -22,31 +31,60 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       {
         name: "plan_tasks",
         description: "Append planned tasks into .chief/tasks.json",
-        inputSchema: zodToJsonSchema(planTasksInputSchema, {
-          target: "jsonSchema7"
-        })
+        inputSchema: toJsonSchema(planTasksInputSchema)
+      },
+      {
+        name: "dispatch_worker",
+        description: "Dispatch one pending task to worker process",
+        inputSchema: toJsonSchema(dispatchWorkerInputSchema)
+      },
+      {
+        name: "get_worker_status",
+        description: "Get worker task status with latest log tail",
+        inputSchema: toJsonSchema(getWorkerStatusInputSchema)
+      },
+      {
+        name: "get_worker_summary",
+        description: "Get final summary or error for a task",
+        inputSchema: toJsonSchema(getWorkerSummaryInputSchema)
       }
     ]
   };
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  if (request.params.name !== "plan_tasks") {
-    throw new Error(`Unknown tool: ${request.params.name}`);
+  const args = request.params.arguments ?? {};
+  let text: string;
+
+  switch (request.params.name) {
+    case "plan_tasks":
+      text = await planTasks(args);
+      break;
+    case "dispatch_worker":
+      text = await dispatchWorker(args);
+      break;
+    case "get_worker_status":
+      text = await getWorkerStatus(args);
+      break;
+    case "get_worker_summary":
+      text = await getWorkerSummary(args);
+      break;
+    default:
+      throw new Error(`Unknown tool: ${request.params.name}`);
   }
 
-  const markdownTable = await planTasks(request.params.arguments ?? {});
   return {
     content: [
       {
         type: "text",
-        text: markdownTable
+        text
       }
     ]
   };
 });
 
 async function main(): Promise<void> {
+  await ensureDefaultConfigFile();
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }
