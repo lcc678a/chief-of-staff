@@ -1,0 +1,10 @@
+﻿{
+  "mcpServers": {
+    "chief-of-staff": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\lichangchun\\Desktop\\chief-of-staff\\chief-mcp-server\\dist\\server.js"
+      ]
+    }
+  }
+}
