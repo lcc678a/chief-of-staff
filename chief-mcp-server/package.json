@@ -1,0 +1,20 @@
+{
+  "name": "chief-mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --enable-source-maps --loader ts-node/esm src/server.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "zod": "^3.23.8",
+    "zod-to-json-schema": "^3.23.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
