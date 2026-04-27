@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import path from "node:path";
 import { z } from "zod";
+import { readConfig } from "../lib/config.js";
 import { PROJECT_ROOT } from "../lib/paths.js";
 import { getTask, updateTask } from "../lib/tasks_store.js";
 
@@ -20,8 +21,22 @@ export async function dispatchWorker(rawInput: unknown): Promise<string> {
     return `Task ${input.task_id} is ${task.status}, expected pending.`;
   }
 
+  const config = await readConfig();
+  const providerName = config.default_provider;
+  const providerConfig = config.providers[providerName];
+  if (!providerConfig) {
+    return `派发失败：未找到 provider 配置（${providerName}）。`;
+  }
+
+  const model = providerConfig.models[task.model_level];
+  if (!model) {
+    return `派发失败：provider ${providerName} 未配置 model_level=${task.model_level} 的模型。`;
+  }
+
   await updateTask(input.task_id, {
     status: "running",
+    provider: providerName,
+    model,
     started_at: new Date().toISOString(),
     finished_at: undefined,
     error: undefined
@@ -38,5 +53,9 @@ export async function dispatchWorker(rawInput: unknown): Promise<string> {
     pid: child.pid
   });
 
-  return `Dispatched ${input.task_id} (pid=${child.pid}). Use get_worker_status to check progress.`;
+  return `已派出 ${input.task_id}
+
+- 状态：running
+- 工兵模型：${providerName} / ${model}
+- pid：${child.pid}`;
 }
