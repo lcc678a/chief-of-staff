@@ -346,6 +346,14 @@ Chief-of-Staff 保留两条工兵路线：
 - docs 可视情况 depends_on implementation 或并行。
 - 如果依赖关系不清楚，先问用户或先派 research 任务，不要乱并行。
 
+## 依赖安全门
+
+- 准备 Cursor 工兵任务前，如果任务有 depends_on，应先确认依赖任务已 done。
+- 如果依赖未完成，不要派发 Cursor 工兵任务。
+- 不要为了加速而并行派发有明确前后顺序的任务。
+- 如果用户坚持提前执行，应先说明风险并让用户确认。
+- 工兵拿到任务后，如果发现前置结果缺失，应 blocked 回传，不要硬做。
+
 ## 重发同一任务的工兵任务包（禁止用新 task 顶替）
 
 用户要**再次拿到**可复制任务包、或说「重发 task-001 的任务包」时：**对同一 `task_id` 再次调用 `prepare_cursor_agent_task`**。只要该任务仍为 `waiting_for_cursor_agent` 且为 Cursor 工兵路线，工具会**重发任务包**，**禁止**为此再调 `plan_tasks` 新建 `task-002` 等重复任务。

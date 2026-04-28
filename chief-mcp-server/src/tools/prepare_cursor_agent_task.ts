@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
 import { PROJECT_ROOT } from "../lib/paths.js";
-import { getTask, updateTask } from "../lib/tasks_store.js";
+import { getTask, readTasks, updateTask } from "../lib/tasks_store.js";
 import type { Task } from "../types.js";
 
 const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START";
@@ -21,6 +21,8 @@ type PrepareCursorAgentTaskInput = z.infer<typeof prepareCursorAgentTaskInputSch
 function buildAgentTaskMarkdown(
   taskId: string,
   taskDescription: string,
+  dependsOn: string[] | undefined,
+  blockedBy: string[] | undefined,
   allowedFiles: string[] | undefined,
   forbiddenFiles: string[] | undefined,
   lane: string,
@@ -29,6 +31,14 @@ function buildAgentTaskMarkdown(
   extraInstructionsBlock: string,
   submitExampleReportedModel: string
 ): string {
+  const dependsOnText =
+    dependsOn && dependsOn.length > 0
+      ? dependsOn.map((item) => `- ${item}`).join("\n")
+      : "- 未指定";
+  const blockedByText =
+    blockedBy && blockedBy.length > 0
+      ? blockedBy.map((item) => `- ${item}`).join("\n")
+      : "- 未指定";
   const allowedFilesText =
     allowedFiles && allowedFiles.length > 0
       ? allowedFiles.map((item) => `- ${item}`).join("\n")
@@ -51,6 +61,15 @@ function buildAgentTaskMarkdown(
 任务描述：
 ${taskDescription}
 ${extraInstructionsBlock}
+依赖关系：
+依赖任务：
+${dependsOnText}
+
+阻塞来源：
+${blockedByText}
+
+如果你发现依赖任务未完成，或当前任务所需前置条件不存在，不要擅自继续。请调用 submit_worker_result，outcome=blocked，并在 needs 中说明缺少哪些前置结果。
+
 文件范围：
 允许修改：
 ${allowedFilesText}
@@ -121,6 +140,8 @@ function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): strin
   return buildAgentTaskMarkdown(
     task.id,
     task.description,
+    task.depends_on,
+    task.blocked_by,
     task.allowed_files,
     task.forbidden_files,
     lane,
@@ -129,6 +150,14 @@ function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): strin
     extraInstructionsBlock,
     submitExampleReportedModel
   );
+}
+
+function unmetDependencyReason(allTasks: Task[], depId: string): string {
+  const depTask = allTasks.find((task) => task.id === depId);
+  if (!depTask) {
+    return "未找到";
+  }
+  return depTask.status;
 }
 
 function formatToolReturn(
@@ -170,6 +199,24 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
       return `任务 ${input.task_id} 当前状态为 waiting_for_cursor_agent，但工兵路线不是 cursor_agent，无法准备或重发 Cursor 工兵任务包。`;
     }
     return `任务 ${input.task_id} 当前状态为 ${status}，无法准备或重发 Cursor 工兵任务包。仅支持：pending（首次准备），或 waiting_for_cursor_agent 且工兵路线为 cursor_agent（重发任务包）。`;
+  }
+
+  const dependsOn = task.depends_on ?? [];
+  if (dependsOn.length > 0) {
+    const allTasks = await readTasks();
+    const unmet = dependsOn
+      .map((depId) => ({ id: depId, status: unmetDependencyReason(allTasks, depId) }))
+      .filter((item) => item.status !== "done");
+    if (unmet.length > 0) {
+      const lines = unmet.map((item) => `  - ${item.id}：${item.status}`).join("\n");
+      return `无法准备 Cursor 工兵任务：依赖尚未完成。
+
+- 当前任务：${task.id}
+- 未完成依赖：
+${lines}
+
+建议先完成依赖任务，或让参谋调整 depends_on / blocked_by。`;
+    }
   }
 
   const suggestedModel = resolveSuggestedModel(input, task);

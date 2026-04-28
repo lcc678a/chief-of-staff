@@ -23,6 +23,7 @@
 - Use different windows for different lanes.
 - Do not modify the same file scope in parallel tasks.
 - Use depends_on/blocked_by for ordered tasks; do not parallelize tasks with clear prerequisite order.
+- Prepare Cursor worker tasks only after depends_on tasks are done; if dependencies are unclear, run research/spec first.
 
 ## Outcome Protocol
 

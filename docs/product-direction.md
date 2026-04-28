@@ -31,6 +31,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 - Cursor-first is not Cursor-only: External API Worker remains a long-term route for user custom models and API-driven automation.
 - External API Worker is especially important for user-owned provider/model strategy and scalable background execution.
 - Complex workflows should use depends_on/blocked_by and avoid unsafe parallelization of ordered tasks.
+- depends_on is not only a record field; it should be used as a safety gate before preparing downstream Cursor worker tasks.
 
 ## Future Directions
 

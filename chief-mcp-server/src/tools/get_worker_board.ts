@@ -132,5 +132,5 @@ ${laneBlocks}
 
 ## 建议下一步
 
-优先处理 blocked；其次处理 waiting_for_cursor_agent；避免并行修改同一文件范围。`;
+优先处理 blocked；其次处理 waiting_for_cursor_agent；避免并行修改同一文件范围。依赖不会自动执行，需要先完成前置任务。`;
 }

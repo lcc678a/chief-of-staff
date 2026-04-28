@@ -137,8 +137,8 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
 
   const nextStep =
     blockedTasks.length > 0
-      ? "先处理 blocked 任务；如果没有 blocked，就继续等待或重发 waiting 任务包。"
-      : "继续等待或重发 waiting 任务包。";
+      ? "先处理 blocked 任务；如果没有 blocked，就继续等待或重发 waiting 任务包。依赖不会自动执行，需要先完成前置任务。"
+      : "继续等待或重发 waiting 任务包。依赖不会自动执行，需要先完成前置任务。";
 
   const noticeSection =
     notices.length > 0
