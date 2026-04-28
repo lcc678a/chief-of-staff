@@ -331,6 +331,21 @@ Chief-of-Staff 保留两条工兵路线：
 
 新增 worker board 不应删除、覆盖或弱化 external worker 路线。
 
+## 任务依赖
+
+- 如果任务必须等另一个任务完成，应设置 depends_on。
+- 如果任务当前无法执行，因为前置任务未完成，应设置 blocked_by。
+- 不要把明显有前后顺序的任务并行派发。
+- 对复杂项目，优先拆成：
+  1. research / spec
+  2. implementation
+  3. verification
+  4. docs
+- implementation 通常 depends_on research/spec。
+- verification 通常 depends_on implementation。
+- docs 可视情况 depends_on implementation 或并行。
+- 如果依赖关系不清楚，先问用户或先派 research 任务，不要乱并行。
+
 ## 重发同一任务的工兵任务包（禁止用新 task 顶替）
 
 用户要**再次拿到**可复制任务包、或说「重发 task-001 的任务包」时：**对同一 `task_id` 再次调用 `prepare_cursor_agent_task`**。只要该任务仍为 `waiting_for_cursor_agent` 且为 Cursor 工兵路线，工具会**重发任务包**，**禁止**为此再调 `plan_tasks` 新建 `task-002` 等重复任务。

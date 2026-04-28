@@ -116,6 +116,10 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
   const waitingTasks = tasks
     .filter((task) => task.status === "waiting_for_cursor_agent")
     .slice(0, 5);
+  const blockedByTasks = tasks
+    .filter((task) => (task.blocked_by?.length ?? 0) > 0)
+    .slice(0, 5);
+  const hasDependsOnTasks = tasks.some((task) => (task.depends_on?.length ?? 0) > 0);
 
   const notices: string[] = [];
   for (const task of blockedTasks) {
@@ -123,6 +127,12 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
   }
   for (const task of waitingTasks) {
     notices.push(`- ${task.id} waiting_for_cursor_agent：${waitingReason(task)}`);
+  }
+  for (const task of blockedByTasks) {
+    notices.push(`- ${task.id} 被依赖阻塞：${task.blocked_by?.join("、")}`);
+  }
+  if (hasDependsOnTasks) {
+    notices.push("- 存在 depends_on 依赖关系：请按前后顺序推进任务。");
   }
 
   const nextStep =

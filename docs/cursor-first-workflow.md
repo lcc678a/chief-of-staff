@@ -22,6 +22,7 @@
 - Reuse the same window for the same lane.
 - Use different windows for different lanes.
 - Do not modify the same file scope in parallel tasks.
+- Use depends_on/blocked_by for ordered tasks; do not parallelize tasks with clear prerequisite order.
 
 ## Outcome Protocol
 
@@ -43,3 +44,4 @@ Cursor-first is the current MVP mainline, not Cursor-only.
 - Use Cursor Agent Worker for local interactive coding tasks.
 - Use External API Worker for custom provider/model usage, long or batch tasks, and text-only analysis.
 - Mixed route is recommended when needed: external worker for upstream analysis, Cursor worker for local code changes.
+- Dependencies complement lane and file scopes in complex project workflows.

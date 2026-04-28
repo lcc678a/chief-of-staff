@@ -59,6 +59,23 @@ function formatFileScopeSection(task: Task): string {
   return parts.join("");
 }
 
+function formatDependencySection(task: Task): string {
+  const dependsOn = task.depends_on?.length ? task.depends_on : undefined;
+  const blockedBy = task.blocked_by?.length ? task.blocked_by : undefined;
+  if (!dependsOn && !blockedBy) {
+    return "";
+  }
+
+  const parts: string[] = [];
+  if (dependsOn) {
+    parts.push(`\n依赖任务：\n${dependsOn.map((item) => `- ${item}`).join("\n")}`);
+  }
+  if (blockedBy) {
+    parts.push(`\n阻塞来源：\n${blockedBy.map((item) => `- ${item}`).join("\n")}`);
+  }
+  return parts.join("");
+}
+
 export async function getWorkerStatus(rawInput: unknown): Promise<string> {
   const input: GetWorkerStatusInput = getWorkerStatusInputSchema.parse(rawInput);
   const task = await getTask(input.task_id);
@@ -90,10 +107,11 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
         ? `\n错误/阻塞信息：${task.error}`
         : "";
     const fileScopeLine = formatFileScopeSection(task);
+    const dependencyLine = formatDependencySection(task);
 
     return `**${task.id}** · \`${task.status}\` · cursor_agent${outcomeLine}
 
-工兵模型：cursor_agent / ${displayModel}${laneLine}${windowHintLine}${note}${summaryLine}${needsLine}${errLine}${fileScopeLine}${agentFileLine}${resultFileLine}
+工兵模型：cursor_agent / ${displayModel}${laneLine}${windowHintLine}${note}${summaryLine}${needsLine}${errLine}${dependencyLine}${fileScopeLine}${agentFileLine}${resultFileLine}
 
 <details>
 <summary>📜 最近日志（最后 20 行）</summary>
@@ -115,10 +133,12 @@ ${logs}
         ? ` · error=${task.error ?? "(unknown)"}`
         : "";
   const fileScopeLine = formatFileScopeSection(task);
+  const dependencyLine = formatDependencySection(task);
 
   return `**${task.id}** · \`${task.status}\` · route=\`${workerRoute}\` · provider=\`${provider}\` · model=\`${model}\`${pidText}${resultText}${tailLine}
 工兵路线：external
 工兵模型：${provider} / ${model}
+${dependencyLine}
 ${fileScopeLine}
 
 <details>

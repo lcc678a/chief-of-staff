@@ -11,6 +11,10 @@ export interface Task {
   id: string;
   description: string;
   model_level: ModelLevel;
+  /** 本任务依赖的前置任务 */
+  depends_on?: string[];
+  /** 本任务当前被哪些任务阻塞 */
+  blocked_by?: string[];
   /** 允许修改的文件、目录或路径范围 */
   allowed_files?: string[];
   /** 禁止修改的文件、目录或路径范围 */

@@ -104,6 +104,8 @@ export async function getWorkerBoard(rawInput: unknown): Promise<string> {
     .map(([lane, laneTasks]) => {
       const windowHint = windowHintOfLane(laneTasks, lane);
       const routeLabel = laneRouteLabel(laneTasks);
+      const dependencyCount = laneTasks.filter((task) => (task.depends_on?.length ?? 0) > 0).length;
+      const blockedByCount = laneTasks.filter((task) => (task.blocked_by?.length ?? 0) > 0).length;
       const statusLines = DISPLAY_STATUSES.map(
         (status) => `- ${status}：${listIdsByStatus(laneTasks, status)}`
       ).join("\n");
@@ -116,6 +118,8 @@ export async function getWorkerBoard(rawInput: unknown): Promise<string> {
       return `## ${lane}
 - 建议窗口：${windowHint}
 - 工兵路线：${routeLabel}
+- 有依赖任务：${dependencyCount}
+- 被阻塞任务：${blockedByCount}
 ${statusLines}${routeNote}`;
     })
     .join("\n\n");

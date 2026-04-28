@@ -16,3 +16,5 @@ Chief-of-Staff is Cursor-first for MVP, but not Cursor-only.
 - External API Worker is the preferred route when users explicitly request custom model/provider or backend execution.
 
 Hybrid usage is supported: External API Worker can handle research/batch analysis first, then Cursor Agent Worker applies local code changes.
+
+Complex workflows can use `depends_on` / `blocked_by` to avoid unsafe parallel execution. Dependencies complement lane and file scopes.
