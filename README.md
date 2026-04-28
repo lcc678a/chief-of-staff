@@ -29,5 +29,7 @@ The MCP tool `chief_external_preflight` (read-only) checks whether `dispatch_wor
 
 `dispatch_worker` applies the same gates: it does not start an external worker if `depends_on` is incomplete, if the API key env is unset, if config/model/provider is missing, or if `worker_route` is `cursor_agent` without an explicit `provider` or `model`. Failure messages point to `chief_external_preflight` and `chief_config_help` (no secret values printed).
 
+The MCP tool `chief_next_action` (read-only) summarizes what to do next from `.chief/tasks.json`: blocked → failed → waiting_for_cursor_agent → running → pending with unfinished deps → ready pending → all done; optional `lane` filter and `limit`. It suggests tools such as `plan_tasks`, `prepare_cursor_agent_task`, `chief_external_preflight`, `chief_repair`, but does not execute them.
+
 Before preparing a Cursor worker task package, dependencies in `depends_on` should be done to prevent premature dispatch.
 Cursor Agents supports manual Rename: right-click an Agent in the Agents page and rename it using the suggested window name (for example `Cursor 工兵 - workflow`). Chief-of-Staff provides naming hints but does not auto-rename Cursor UI.

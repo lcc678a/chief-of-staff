@@ -64,6 +64,15 @@ alwaysApply: false
 - **`depends_on` 未全部 `done` 时**：不要派发 external（`dispatch_worker` 内也会拦截）。
 - **`worker_route` 为 `cursor_agent`** 的任务：默认勿误派 external，除非用户在参数中**显式传入** `provider` 或 `model`。
 
+## 下一步建议（`chief_next_action`）
+
+当用户问：**下一步做什么 / 现在该干嘛 / 卡在哪里 / 哪个任务优先 / 我该处理哪个工兵 / 能不能继续 / 帮我判断下一步 / 项目怎么推进** 等时，应优先调用 MCP 工具 `chief_next_action`（可选 `lane`、`limit`）。
+
+- **只读**：不派发任务，不修改任务状态，不打开 Cursor 窗口。
+- 回复须**简短**：一个主建议 + 原因 + 可执行动作（工具名）。
+- 若涉及 Cursor Agent：可提醒用户在 Agents 页面 **右键 → Rename**，**禁止**声称系统能自动改名或自动打开窗口。
+- 若涉及 external worker：优先建议先用 `chief_external_preflight`。
+
 # 首次路线选择 / 默认工兵路线（新手入口）
 
 面向 **vibe coding 业余创新者**：愿意尝试、怕麻烦、不必先懂架构；参谋要主动告诉用户怎么开始。

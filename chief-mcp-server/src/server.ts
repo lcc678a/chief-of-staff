@@ -20,6 +20,7 @@ import {
   chiefExternalPreflight,
   chiefExternalPreflightInputSchema
 } from "./tools/chief_external_preflight.js";
+import { chiefNextAction, chiefNextActionInputSchema } from "./tools/chief_next_action.js";
 import { ensureDefaultConfigFile } from "./lib/config.js";
 
 function toJsonSchema(schema: ZodTypeAny): object {
@@ -98,6 +99,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         description:
           "Read-only preflight before dispatch_worker: task/config/deps/route hints; no writes, no network, no secrets",
         inputSchema: toJsonSchema(chiefExternalPreflightInputSchema)
+      },
+      {
+        name: "chief_next_action",
+        description:
+          "Read-only next-step advisor from task queue (blocked/failed/waiting/running/pending/done); no writes or dispatch",
+        inputSchema: toJsonSchema(chiefNextActionInputSchema)
       }
     ]
   };
@@ -140,6 +147,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       break;
     case "chief_external_preflight":
       text = await chiefExternalPreflight(args);
+      break;
+    case "chief_next_action":
+      text = await chiefNextAction(args);
       break;
     default:
       throw new Error(`Unknown tool: ${request.params.name}`);

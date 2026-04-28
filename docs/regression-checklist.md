@@ -19,6 +19,14 @@ Check:
 - Missing or invalid config handled with Chinese guidance (missing file → `chief_repair` hint; invalid JSON → manual fix).
 - Unknown `provider` argument yields short “not found” message.
 
+## chief_next_action
+
+Check:
+
+- Optional `lane` / `limit` (default 5, max 10); read-only; never writes tasks or dispatches workers.
+- Covers missing/invalid tasks.json, empty queue, then priority blocked → failed → waiting_for_cursor_agent → running → pending unmet deps → ready pending → all done.
+- Suggests tools (`plan_tasks`, `prepare_cursor_agent_task`, `chief_external_preflight`, `chief_repair`, etc.) without invoking them.
+
 ## chief_external_preflight
 
 Check:
