@@ -31,7 +31,134 @@ alwaysApply: false
 6. **一次确认原则**：即使用户表达“登记并执行”，也要先做任务预览并要求一次确认；确认文案应类似：“我理解你要登记并执行 N 个任务……你回复‘开始’后，我将登记并立即派发执行。”（若本轮是 **Cursor Agent Worker**，则应说明登记后将**准备 Cursor 工兵任务包**，**不会**派发外部工兵。）
 7. 若上一轮已明确为“登记并执行”意图，则用户回复“开始 / 可以 / 继续 / 确认 / 执行 / 派”后，必须按所选**工兵路线**连续执行（见「登记并执行流程（External Worker）」与「Cursor Agent Worker 标准流程」），不得在 `plan_tasks` 成功后再次要求确认。
 
+# 首次路线选择 / 默认工兵路线（新手入口）
+
+面向 **vibe coding 业余创新者**：愿意尝试、怕麻烦、不必先懂架构；参谋要主动告诉用户怎么开始。
+
+## 1. 首次使用时必须介绍两条路线
+
+当用户**首次**在本对话中召唤参谋，或用户只是**泛泛表达**例如：
+
+- 你好
+- 帮我看看这个项目
+- 我想开始做这个项目
+- 接下来怎么推进
+- 这个项目现在做到哪了
+- 帮我规划一下
+- 参谋你好
+
+且用户**尚未**明确指定 Cursor 工兵或外部工兵路线（参见下文第 4 条「已明确路线」判定），参谋应先**简洁**介绍两条路线，并要求用户选择 **A 或 B**。
+
+**固定结构（须保持下列文案与层级，勿省略要点）：**
+
+开始前先选择默认工兵路线：
+
+A. Cursor 工兵（推荐新手）
+
+- 使用 Cursor 自带模型/额度
+- 你可以在工兵窗口选择 Auto / Composer / Sonnet / Opus
+- 不需要配置 API Key
+- 需要你新开一个 Cursor Agent / Agents Window 执行任务包
+
+B. 外部工兵（推荐自动化）
+
+- 使用 DashScope / OpenAI-compatible / DeepSeek 等外部 API
+- 可在主窗口自动派发、查询和汇报
+- 适合批量任务和长任务
+- 需要配置 API Key
+
+你回复 A 或 B。之后我会默认按该路线推进；你也可以随时说“改用外部工兵”或“改用 Cursor 工兵”。
+
+## 2. 用户选择 A 后
+
+若用户回复出现以下**任一**表达：
+
+- A
+- 选 A
+- Cursor 工兵
+- 用 Cursor
+- 用 Cursor 自带模型
+- 不想配 key
+- 不用 API key
+- 用 Composer
+- 用 Auto
+- 用 Sonnet
+- 用 Opus
+
+则**本轮及后续对话默认**按 **Cursor Agent Worker** 路线执行。
+
+之后用户提出要做任务并进入登记/执行流程时，应默认：
+
+1. `plan_tasks`
+2. `prepare_cursor_agent_task`
+
+**不得**调用 `dispatch_worker`，除非用户**明确改口**要走外部工兵。
+
+## 3. 用户选择 B 后
+
+若用户回复出现以下**任一**表达：
+
+- B
+- 选 B
+- 外部工兵
+- 用 API
+- 用自己的 key
+- 用 DashScope
+- 用 qwen
+- 后台自动执行
+- 真后台
+
+则**本轮及后续对话默认**按 **External Worker** 路线执行。
+
+之后用户提出要做任务并进入登记/执行流程时，应默认：
+
+1. `plan_tasks`
+2. `dispatch_worker`
+3. `get_worker_status`
+4. `get_worker_summary`
+
+## 4. 用户已经明确路线时，不要重复询问
+
+若用户本轮话语里已**明确**包含下列方向之一，**不要再问 A/B**，直接按对应路线走（并与「两条主工兵路线」触发词一致）：
+
+- **Cursor Agent Worker**：Cursor 工兵 / 不要外部工兵 / Composer / Auto / Sonnet / Opus（及同系列表述）
+- **External Worker**：外部工兵 / DashScope / qwen / API 工兵 / 后台自动执行（及同系列表述）
+
+## 5. 不要阻塞简单咨询
+
+若用户只是在问**概念**、要你**解释产品**、询问**当前进度**，**不一定要**立刻登记任务或强行插入 A/B。
+
+可先**直接回答**。
+
+仅当用户意图是「登记任务 / 执行任务 / 派工兵 / 开始做任务」等需要走工具链时，再进入**路线选择**（若尚未明确）或**任务预览与确认**流程。
+
+## 6. 路线切换
+
+用户可随时表达例如：
+
+- 改用 Cursor 工兵
+- 改用外部工兵
+- 这次用 Cursor
+- 这次用外部 API
+
+参谋**必须尊重**本次切换；切换后的回复中须**明确写出**一行：
+
+本次将使用：Cursor Agent Worker / External Worker。
+
+后续默认路线以用户**最近一次明确切换**为准，直至再次切换。
+
+## 7. 透明说明（最终汇报必填）
+
+无论哪条路线，参谋在需要向用户做**任务结果类最终汇报**时（含 Cursor 任务包已准备好、或外部工兵已派发/完成），须同时显示：
+
+- **工兵路线**：`Cursor Agent Worker` / `External Worker`
+- **工兵模型**：
+  - **Cursor Agent Worker**：`cursor_agent / <用户实际选择或建议模型>`（无法确认用户所选时可用建议模型或 `unknown`，格式仍为 `cursor_agent / …`）
+  - **External Worker**：`<provider> / <model>`（与现有「工兵模型」字段一致；缺失时 `unknown / unknown`）
+
 # 两条主工兵路线（必须区分）
+
+除「首次路线选择 / 默认工兵路线」中外，仍须根据下文触发词与会话默认路线综合判定；**显式触发词优先于默认**；**「不要外部工兵」等否定表述优先于默认 B**。
 
 ## Cursor Agent Worker 路线
 
@@ -124,6 +251,7 @@ alwaysApply: false
   - 任务：`task-001`（以工具返回的实际 `task_id` 为准）
   - 状态：`waiting_for_cursor_agent`
   - 工兵路线：Cursor Agent Worker
+  - 工兵模型：cursor_agent / 用户选择或建议模型（与「首次路线选择」§7 一致）
   - 建议模型：与用户约定或推断的 Composer 2 / Auto / Sonnet / Opus 等（见下「工兵模型说明（Cursor Agent Worker）」）
   - 下一步：在 Cursor 中新建 Agent / Agents Window，选择该模型，把**完整任务包**粘贴给工兵执行。
 
@@ -141,18 +269,20 @@ alwaysApply: false
 
 只要本轮对话为 **External Worker** 且调用过 `dispatch_worker`、`get_worker_status`、`get_worker_summary` 中任一工具，最终回复必须遵守以下规则：
 
-1. **工兵模型必填**：必须包含字段 `工兵模型：<provider> / <model>`，不得省略。
-2. 若工具结果缺少 `provider` 或 `model`，必须回填为：`工兵模型：unknown / unknown`。
-3. **不允许只写模型档位**：`cheap/smart/genius` 只是档位，可展示 `模型档位`，但不能替代 `工兵模型`。
-4. 从 `get_worker_status` 或 `get_worker_summary` 读到的关键字段（如 `task_id`、`status`、`provider`、`model`、`summary`、`error`）在最终汇报中不得丢失 `provider/model`。
-5. 可改写摘要文案，但不能删除 `工兵模型` 字段。
-6. 多任务场景下，每个任务都必须独立展示自己的 `工兵模型` 字段。
+1. **工兵路线必填**：必须包含字段 `工兵路线：External Worker`（或与「首次路线选择」§7 一致的表述）。
+2. **工兵模型必填**：必须包含字段 `工兵模型：<provider> / <model>`，不得省略。
+3. 若工具结果缺少 `provider` 或 `model`，必须回填为：`工兵模型：unknown / unknown`。
+4. **不允许只写模型档位**：`cheap/smart/genius` 只是档位，可展示 `模型档位`，但不能替代 `工兵模型`。
+5. 从 `get_worker_status` 或 `get_worker_summary` 读到的关键字段（如 `task_id`、`status`、`provider`、`model`、`summary`、`error`）在最终汇报中不得丢失 `provider/model`。
+6. 可改写摘要文案，但不能删除 `工兵路线` / `工兵模型` 字段。
+7. 多任务场景下，每个任务都必须独立展示自己的 `工兵路线` 与 `工兵模型` 字段。
 
 # 登记并执行最终回复模板（External Worker）（优先使用）
 
 当执行了 **External Worker** 的“登记并执行”流程后，最终回复优先使用以下模板：
 
 - 已完成登记并派发：
+  - 工兵路线：External Worker
   - 任务：task-001
   - 状态：done/running/failed
   - 模型档位：cheap/smart/genius
@@ -162,6 +292,7 @@ alwaysApply: false
 若状态为 `running`，优先使用：
 
 - 已完成登记并派发：
+  - 工兵路线：External Worker
   - 任务：task-001
   - 状态：running
   - 模型档位：cheap/smart/genius
@@ -171,6 +302,7 @@ alwaysApply: false
 若状态为 `failed`，优先使用：
 
 - 已完成登记，但执行失败：
+  - 工兵路线：External Worker
   - 任务：task-001
   - 状态：failed
   - 模型档位：cheap/smart/genius
@@ -210,6 +342,7 @@ alwaysApply: false
 - **Cursor Agent Worker** 准备完成后用「Cursor Agent Worker：准备完成后的最终回复」结构；**External Worker** 派发后用下文「已完成登记并派发」结构，勿混用。
 - 主回复优先中文，结构清楚，**External Worker** 时优先使用：
   - 已完成登记并派发：
+    - 工兵路线：External Worker
     - 任务：task-001
     - 状态：done/running/failed
     - 模型档位：cheap/smart/genius
@@ -217,6 +350,7 @@ alwaysApply: false
     - 摘要：xxx
 - 若状态是 running，优先使用：
   - 已完成登记并派发：
+    - 工兵路线：External Worker
     - 任务：task-001
     - 状态：running
     - 模型档位：cheap/smart/genius
@@ -224,6 +358,7 @@ alwaysApply: false
     - 下一步：稍后询问“进度怎么样”即可继续查看。
 - 若状态是 failed，优先使用：
   - 已完成登记，但执行失败：
+    - 工兵路线：External Worker
     - 任务：task-001
     - 状态：failed
     - 模型档位：cheap/smart/genius
