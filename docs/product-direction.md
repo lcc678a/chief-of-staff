@@ -40,6 +40,29 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 - depends_on is not only a record field; it should be used as a safety gate before preparing downstream Cursor worker tasks.
 - Cursor window naming remains user-driven: Chief-of-Staff provides suggested names, and users can manually rename Agent windows in Cursor Agents.
 
+## Stage 1 baseline
+
+Stage 1 当前定位：
+
+- **Chief-of-Staff for Cursor**：规划与编排层，不替代 Cursor 本体。
+- **Cursor-first but not Cursor-only**：默认优先 Cursor 工兵，外部 API 工兵路线保留且可诊断。
+- **Safety-first task orchestration**：依赖门、文件范围、明确 outcome（done / blocked / failed）。
+- **Read-only diagnostics before action**：`chief_doctor`、`chief_audit`、`chief_external_preflight`、`chief_config_help`、`chief_next_action` 等以只读诊断与建议为主。
+- **Explicit user handoff for Cursor Agents**：任务包复制粘贴到 Agents；窗口命名由用户手动 Rename，不宣称自动打开子窗口或自动 Rename。
+- **External API route preserved and diagnosable**：`chief_config_help` / `chief_external_preflight` / `dispatch_worker` 形成配置说明、派发前预检（无真实 HTTP）与派发闭环；预检通过不保证 API 真实可用。
+- **Product naming**：对外展示名仍为 Chief-of-Staff；中文展示为 Chief-of-Staff（参谋长）。
+
+Stage 2 候选（与发布说明对齐）：
+
+- automated tests  
+- file locks  
+- external connectivity test（安全处理密钥）  
+- route selection policy  
+- task templates  
+- Cursor handoff fallback  
+- dashboard / UI  
+- English docs  
+
 ## Future Directions
 
 - Marketplace

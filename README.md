@@ -1,3 +1,20 @@
+# Chief-of-Staff
+
+**Product name:** Chief-of-Staff  
+**中文名：** Chief-of-Staff（参谋长）  
+**Positioning:** Chief-of-Staff for Cursor  
+**Scope:** Cursor-first but not Cursor-only（以 Cursor 为主战场，同时保留外部 API 工兵路线）。
+
+## Documentation
+
+| Doc | Description |
+|-----|-------------|
+| [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md) | 中文快速开始 |
+| [docs/stage-1-release-notes.zh-CN.md](docs/stage-1-release-notes.zh-CN.md) | Stage 1 中文发布说明 |
+| [docs/stage-1-acceptance-plan.md](docs/stage-1-acceptance-plan.md) | Stage 1 验收计划 |
+| [docs/regression-checklist.md](docs/regression-checklist.md) | 回归清单 |
+| [docs/product-direction.md](docs/product-direction.md) | 产品方向 |
+
 ## Cursor-first workflow
 
 Chief-of-Staff works as a planning layer for Cursor Agent workflows.
