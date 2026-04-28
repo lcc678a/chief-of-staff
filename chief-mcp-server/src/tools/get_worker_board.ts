@@ -45,6 +45,16 @@ function windowHintOfLane(tasks: Task[], lane: string): string {
   return `Cursor 工兵 - ${lane}`;
 }
 
+function laneRouteLabel(tasks: Task[]): string {
+  const routes = new Set(
+    tasks.map((task) => task.worker_route ?? "external")
+  );
+  if (routes.size > 1) {
+    return "mixed";
+  }
+  return routes.has("cursor_agent") ? "cursor_agent" : "external";
+}
+
 export async function getWorkerBoard(rawInput: unknown): Promise<string> {
   getWorkerBoardInputSchema.parse(rawInput);
 
@@ -93,18 +103,20 @@ export async function getWorkerBoard(rawInput: unknown): Promise<string> {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([lane, laneTasks]) => {
       const windowHint = windowHintOfLane(laneTasks, lane);
+      const routeLabel = laneRouteLabel(laneTasks);
       const statusLines = DISPLAY_STATUSES.map(
         (status) => `- ${status}：${listIdsByStatus(laneTasks, status)}`
       ).join("\n");
       return `## ${lane}
 - 建议窗口：${windowHint}
+- 工兵路线：${routeLabel}
 ${statusLines}`;
     })
     .join("\n\n");
 
   return `# 工兵看板
 
-说明：Cursor 窗口名可能由 Cursor 自动生成；以下是 Chief-of-Staff 记录的建议窗口和任务线。
+说明：以下是 Chief-of-Staff 记录的任务线、建议窗口和工兵路线。Cursor 真实窗口名可能由 Cursor 自动生成；外部 API 工兵没有 Cursor 窗口。
 
 ${laneBlocks}
 

@@ -86,6 +86,7 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
   const cursorRulesExists = await exists(
     path.join(PROJECT_ROOT, ".cursor", "rules", "chief-of-staff.mdc")
   );
+  const routeSection = `\n## 工兵路线\n\n- Cursor 工兵：可用，用于本地交互式任务包执行\n- 外部 API 工兵：保留，用于自定义 API 模型和自动化任务；体检不会显示 API Key\n`;
 
   if (tasks.length === 0) {
     return `# Chief-of-Staff 体检
@@ -94,7 +95,7 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
 - 任务总数：0
 - agent-tasks：${agentTasksExists ? "存在" : "不存在"}
 - results：${resultsExists ? "存在" : "不存在"}
-- Cursor rules：${cursorRulesExists ? "存在" : "不存在"}
+- Cursor rules：${cursorRulesExists ? "存在" : "不存在"}${routeSection}
 
 ## 建议下一步
 
@@ -137,7 +138,7 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
 - failed：${counts.failed}
 - agent-tasks：${agentTasksExists ? "存在" : "不存在"}
 - results：${resultsExists ? "存在" : "不存在"}
-- Cursor rules：${cursorRulesExists ? "存在" : "不存在"}${noticeSection}
+- Cursor rules：${cursorRulesExists ? "存在" : "不存在"}${noticeSection}${routeSection}
 ## 建议下一步
 
 ${nextStep}`;

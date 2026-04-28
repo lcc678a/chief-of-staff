@@ -158,6 +158,35 @@ B. 外部工兵（推荐自动化）
 
 # 两条主工兵路线（必须区分）
 
+## 双工兵路线
+
+Chief-of-Staff 保留两条工兵路线：
+
+### A. Cursor 工兵
+适合：
+- 本地代码修改
+- 需要 Cursor 读取项目上下文
+- 用户希望观察执行过程
+- 新手不想配置 API Key
+
+### B. 外部 API 工兵
+适合：
+- 用户已经配置自己的 API Key
+- 用户明确要求使用 DashScope / OpenAI-compatible / DeepSeek / Qwen / 自定义模型
+- 批量任务
+- 长任务
+- 纯文本分析
+- 自动化执行
+- 不需要用户手动复制到 Cursor 窗口的任务
+
+硬性规则：
+- 用户明确说“用我的 API / 外部模型 / DashScope / OpenAI-compatible / DeepSeek / Qwen / 自定义模型”时，优先选择外部 API 工兵路线。
+- 用户明确说“用 Cursor / Cursor Agent / Composer / 新窗口 / 本地改代码”时，优先选择 Cursor 工兵路线。
+- Cursor-first 不等于 Cursor-only。
+- 不要因为当前默认推荐 Cursor 工兵，就忽略外部 API 工兵。
+- 如果任务更适合外部 API 工兵，应向用户说明并建议切换，但不要长篇解释。
+- 如果用户之前选择过 A/B 默认路线，尊重用户选择；只有当任务明显不适合当前路线时才提醒。
+
 除「首次路线选择 / 默认工兵路线」中外，仍须根据下文触发词与会话默认路线综合判定；**显式触发词优先于默认**；**「不要外部工兵」等否定表述优先于默认 B**。
 
 ## Cursor Agent Worker 路线

@@ -4,6 +4,7 @@
 
 - Main window: Chief-of-Staff (planning and coordination).
 - Worker windows: Cursor Agent Worker (execution).
+- External API Worker is also supported for API-key based custom models and automation tasks.
 
 ## Standard Flow
 
@@ -33,3 +34,11 @@
 - Final handoff stays as one sentence plus one code block.
 - Do not force users to read long explanations.
 - Keep required execution context inside the task package.
+
+## Route Note
+
+Cursor-first is the current MVP mainline, not Cursor-only.
+
+- Use Cursor Agent Worker for local interactive coding tasks.
+- Use External API Worker for custom provider/model usage, long or batch tasks, and text-only analysis.
+- Mixed route is recommended when needed: external worker for upstream analysis, Cursor worker for local code changes.

@@ -117,6 +117,8 @@ ${logs}
   const fileScopeLine = formatFileScopeSection(task);
 
   return `**${task.id}** · \`${task.status}\` · route=\`${workerRoute}\` · provider=\`${provider}\` · model=\`${model}\`${pidText}${resultText}${tailLine}
+工兵路线：external
+工兵模型：${provider} / ${model}
 ${fileScopeLine}
 
 <details>

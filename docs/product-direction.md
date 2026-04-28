@@ -28,6 +28,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 ## Current Mainline
 
 - Cursor-first MVP.
+- Cursor-first is not Cursor-only: External API Worker remains a long-term route for user custom models and API-driven automation.
 
 ## Future Directions
 
@@ -38,3 +39,4 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 - file locks
 - docs
 - tests
+- Hybrid route: External API Worker for analysis/batch work, Cursor Agent Worker for local code implementation, coordinated by Chief-of-Staff.

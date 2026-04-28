@@ -122,10 +122,16 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
   if (task.status !== "done" && task.status !== "blocked" && task.status !== "failed") {
     return `${header}
 
+- 工兵路线：external
+- 工兵模型：${provider} / ${model}
+
 Task ${task.id} is not done yet (status: ${task.status}).`;
   }
 
   return `${header}
+
+- 工兵路线：external
+- 工兵模型：${provider} / ${model}
 
 ${resultFile}
 
