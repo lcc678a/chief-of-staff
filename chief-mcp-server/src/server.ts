@@ -13,6 +13,7 @@ import {
 } from "./tools/prepare_cursor_agent_task.js";
 import { submitWorkerResult, submitWorkerResultInputSchema } from "./tools/submit_worker_result.js";
 import { chiefDoctor, chiefDoctorInputSchema } from "./tools/chief_doctor.js";
+import { chiefRepair, chiefRepairInputSchema } from "./tools/chief_repair.js";
 import { getWorkerBoard, getWorkerBoardInputSchema } from "./tools/get_worker_board.js";
 import { ensureDefaultConfigFile } from "./lib/config.js";
 
@@ -71,6 +72,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         inputSchema: toJsonSchema(chiefDoctorInputSchema)
       },
       {
+        name: "chief_repair",
+        description:
+          "Initialize or repair missing .chief layout (dirs, empty tasks.json, default config); dry_run to preview only",
+        inputSchema: toJsonSchema(chiefRepairInputSchema)
+      },
+      {
         name: "get_worker_board",
         description: "Get lane-based worker board for current tasks",
         inputSchema: toJsonSchema(getWorkerBoardInputSchema)
@@ -104,6 +111,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       break;
     case "chief_doctor":
       text = await chiefDoctor(args);
+      break;
+    case "chief_repair":
+      text = await chiefRepair(args);
       break;
     case "get_worker_board":
       text = await getWorkerBoard(args);

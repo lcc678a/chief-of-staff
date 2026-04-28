@@ -1,5 +1,15 @@
 # Regression Checklist: Core Worker Tools
 
+## chief_repair / project layout
+
+Check:
+
+- `chief_repair` accepts optional `dry_run`; `true` performs no writes, `false`/omit applies fixes.
+- Creates missing `.chief/`, `.chief/agent-tasks/`, `.chief/results/` as needed.
+- Creates `.chief/tasks.json` with `[]` only when missing; never overwrites an existing file; invalid JSON or non-array is reported for manual fix.
+- Missing `.chief/config.json` uses `ensureDefaultConfigFile` behavior (default template, no secrets in output); never overwrites existing config.
+- Does not emit API keys; does not auto-generate `.cursor/rules/chief-of-staff.mdc` (report only).
+
 ## Cursor worker handoff
 
 Check:

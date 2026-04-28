@@ -28,6 +28,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 ## Current Mainline
 
 - Cursor-first MVP.
+- One-shot project repair via MCP `chief_repair`: create missing `.chief` layout and empty `tasks.json` without overwriting user data; rules file is never auto-generated.
 - Cursor-first is not Cursor-only: External API Worker remains a long-term route for user custom models and API-driven automation.
 - External API Worker is especially important for user-owned provider/model strategy and scalable background execution.
 - Complex workflows should use depends_on/blocked_by and avoid unsafe parallelization of ordered tasks.

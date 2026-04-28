@@ -63,7 +63,7 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
 
 ## 建议下一步
 
-请先初始化 .chief/tasks.json，或运行项目初始化流程。`;
+可调用 MCP 工具 \`chief_repair\`（可先 \`dry_run: true\` 预演）创建缺失的 \`.chief/\` 与空的 \`tasks.json\`，或按项目说明手动初始化。`;
   }
 
   let tasks: Task[];
@@ -79,7 +79,7 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
 
 ## 建议下一步
 
-请检查 .chief/tasks.json 是否为合法 JSON。`;
+请检查 .chief/tasks.json 是否为合法 JSON。**不要**指望工具自动覆盖损坏文件；需人工修复后可用 \`chief_doctor\` 复检。`;
   }
 
   const agentTasksExists = await exists(path.join(PROJECT_ROOT, ".chief", "agent-tasks"));

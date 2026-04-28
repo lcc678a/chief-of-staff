@@ -7,6 +7,10 @@
 - External API Worker is also supported for API-key based custom models and automation tasks.
 - When user intent is "my API/custom model/backend run", prefer External API Worker instead of Cursor worker windows.
 
+## Project layout
+
+- If `.chief/` or `tasks.json` is missing, the chief can run MCP `chief_repair` (`dry_run: true` first, optional) to create directories, an empty `tasks.json`, default `config.json` when absent, and `agent-tasks` / `results` folders. Existing `tasks.json` and `config.json` are never overwritten; invalid `tasks.json` must be fixed manually. Missing `chief-of-staff.mdc` is reported but not auto-generated.
+
 ## Standard Flow
 
 1. User states the requirement.
