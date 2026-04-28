@@ -12,6 +12,7 @@ import {
   prepareCursorAgentTaskInputSchema
 } from "./tools/prepare_cursor_agent_task.js";
 import { submitWorkerResult, submitWorkerResultInputSchema } from "./tools/submit_worker_result.js";
+import { chiefDoctor, chiefDoctorInputSchema } from "./tools/chief_doctor.js";
 import { ensureDefaultConfigFile } from "./lib/config.js";
 
 function toJsonSchema(schema: ZodTypeAny): object {
@@ -62,6 +63,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "submit_worker_result",
         description: "Submit Cursor Agent Worker execution result back to chief",
         inputSchema: toJsonSchema(submitWorkerResultInputSchema)
+      },
+      {
+        name: "chief_doctor",
+        description: "Inspect Chief-of-Staff project health and task progress",
+        inputSchema: toJsonSchema(chiefDoctorInputSchema)
       }
     ]
   };
@@ -89,6 +95,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       break;
     case "submit_worker_result":
       text = await submitWorkerResult(args);
+      break;
+    case "chief_doctor":
+      text = await chiefDoctor(args);
       break;
     default:
       throw new Error(`Unknown tool: ${request.params.name}`);
