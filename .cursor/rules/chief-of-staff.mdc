@@ -243,7 +243,7 @@ B. 外部工兵（推荐自动化）
 
 **禁止**在同一轮连续流程中调用 `dispatch_worker`。
 
-若用户已明确表达「开始 / 执行 / 准备 Cursor 工兵任务 / 登记并准备任务包 / 重新发任务包」，可直接调用对应工具链（`plan_tasks` + `prepare_cursor_agent_task` 或仅重发 `prepare_cursor_agent_task`），不要在工具调用前输出流程说明型废话（如“我先读取工具定义/我现在按流程执行/我先登记再准备”）。
+若用户已明确表达「开始 / 执行 / 准备 Cursor 工兵任务 / 登记并准备任务包 / 重新发任务包」，可直接调用对应工具链（`plan_tasks` + `prepare_cursor_agent_task` 或仅重发 `prepare_cursor_agent_task`），不要在工具调用前输出流程说明型废话（如“我先读取工具定义/我现在按流程执行/我先登记再准备”）。工具调用完成后，按下文 USER_VISIBLE 规则直接输出，不再补充解释。
 
 ## 重发同一任务的工兵任务包（禁止用新 task 顶替）
 
@@ -251,12 +251,31 @@ B. 外部工兵（推荐自动化）
 
 # Cursor Agent Worker：准备完成后的最终回复（硬性）
 
-当 **`prepare_cursor_agent_task` 成功**返回后，用户真正需要的是：**知道已准备好 → 复制任务包 → 新开 Cursor Agent / Agents Window → 粘贴执行**。**不要**反复解释工具细节、状态原因、备份文件、路线背景或 MCP 机制。
+当 **`prepare_cursor_agent_task` 成功**返回后，优先检查是否包含：
 
-1. **最终回复格式强制固定**：代码块前最多 1 行，且该行使用：`复制下面任务包，粘贴到新的 Cursor Agent。`
-2. **强制原样转发代码块**：从工具返回中提取 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START` 与 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END` 之间的唯一 `text` 代码块，原样贴出（含开闭围栏与块内全文）。
-3. **不要把 START/END 标记展示给用户**；用户可见内容应只包含上一条短句 + 任务包代码块。
-4. 代码块后**禁止追加任何解释**（不写“已准备任务/状态/工兵路线/建议模型/下一步/备份路径/工具过程”）。
+- `USER_VISIBLE_CURSOR_AGENT_HANDOFF_START`
+- `USER_VISIBLE_CURSOR_AGENT_HANDOFF_END`
+
+若包含，最终回复必须：
+
+1. 提取两个 `USER_VISIBLE` 标记之间的内容。
+2. 原样输出该内容。
+3. 不展示 `USER_VISIBLE` 标记本身。
+4. 不展示 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START/END` 标记。
+5. 不再追加任何说明。
+6. 不输出“已准备任务/状态/工兵路线/工兵模型/备份文件/工具过程”。
+7. 不总结任务包内容。
+8. 代码块后禁止追加文字。
+
+最终用户可见格式只能是：
+
+复制下面完整任务包，粘贴到新的 Cursor Agent / Agents Window 执行。
+
+```text
+完整任务包内容
+```
+
+若工具返回暂未包含 `USER_VISIBLE` 标记，才回退到旧规则：提取 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START/END` 之间的唯一 `text` 代码块，用户可见内容仍只允许“1 行提示 + 代码块”，且代码块后禁止追加文字。
 
 ## Cursor 工兵 outcome：blocked / failed（闭环）
 

@@ -7,6 +7,8 @@ import type { Task } from "../types.js";
 
 const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START";
 const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END";
+const USER_VISIBLE_CURSOR_AGENT_HANDOFF_START = "USER_VISIBLE_CURSOR_AGENT_HANDOFF_START";
+const USER_VISIBLE_CURSOR_AGENT_HANDOFF_END = "USER_VISIBLE_CURSOR_AGENT_HANDOFF_END";
 
 export const prepareCursorAgentTaskInputSchema = z.object({
   task_id: z.string(),
@@ -99,7 +101,15 @@ function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): strin
 function formatToolReturn(
   markdownBody: string
 ): string {
-  return `复制下面任务包，粘贴到新的 Cursor Agent。
+  return `${USER_VISIBLE_CURSOR_AGENT_HANDOFF_START}
+
+复制下面完整任务包，粘贴到新的 Cursor Agent / Agents Window 执行。
+
+\`\`\`text
+${markdownBody}
+\`\`\`
+
+${USER_VISIBLE_CURSOR_AGENT_HANDOFF_END}
 
 ${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START}
 
