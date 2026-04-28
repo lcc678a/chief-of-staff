@@ -22,5 +22,8 @@ Complex workflows can use `depends_on` / `blocked_by` to avoid unsafe parallel e
 ## Project layout repair
 
 The MCP tool `chief_repair` creates missing `.chief/` directories, an empty `.chief/tasks.json` when absent, `.chief/agent-tasks/` and `.chief/results/`, and a default `.chief/config.json` when missing (no API keys written). It does not overwrite existing task or config files. Use `dry_run: true` to preview actions. If `.cursor/rules/chief-of-staff.mdc` is missing, restore it from the repo; the tool does not generate it.
+
+The MCP tool `chief_config_help` (read-only) explains external API worker setup: `default_provider`, each provider's `base_url`, `api_key_env`, whether the env var is set (never the value), and `cheap` / `smart` / `genius` models. No network calls. Cursor Agent Worker does not need an external API key.
+
 Before preparing a Cursor worker task package, dependencies in `depends_on` should be done to prevent premature dispatch.
 Cursor Agents supports manual Rename: right-click an Agent in the Agents page and rename it using the suggested window name (for example `Cursor 工兵 - workflow`). Chief-of-Staff provides naming hints but does not auto-rename Cursor UI.

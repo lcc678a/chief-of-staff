@@ -10,6 +10,15 @@ Check:
 - Missing `.chief/config.json` uses `ensureDefaultConfigFile` behavior (default template, no secrets in output); never overwrites existing config.
 - Does not emit API keys; does not auto-generate `.cursor/rules/chief-of-staff.mdc` (report only).
 
+## chief_config_help / external API config
+
+Check:
+
+- `chief_config_help` accepts optional `provider`; read-only; no writes to `.chief/config.json`; no HTTP.
+- Reports `default_provider`, provider list, each `base_url` / `api_key_env` / model slots; env presence as 已配置 or 未配置 only (never values).
+- Missing or invalid config handled with Chinese guidance (missing file → `chief_repair` hint; invalid JSON → manual fix).
+- Unknown `provider` argument yields short “not found” message.
+
 ## Cursor worker handoff
 
 Check:

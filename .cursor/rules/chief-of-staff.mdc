@@ -38,6 +38,15 @@ alwaysApply: false
 - **禁止**向用户展示或复述任何 API Key；配置相关只引导按项目文档设置环境变量。
 - `.cursor/rules/chief-of-staff.mdc` 若缺失，工具**不**自动生成完整规则，只提示从仓库或备份恢复。
 
+# 外部 API 配置向导（`chief_config_help`）
+
+当用户问：**怎么配置外部 API / API Key 放哪 / DashScope·DeepSeek·Qwen·OpenAI-compatible 怎么配 / provider 或 model 是什么 / 外部工兵为什么跑不起来 / 自定义模型怎么设** 等时，应**优先调用** MCP 工具 `chief_config_help`（可选 `provider` 参数只诊断某一 provider）。
+
+- **只读**：不修改 `.chief/config.json`，不写入 provider，**不**发起真实 API 请求。
+- **安全**：**禁止**显示或复述 API Key 内容；仅说明对应环境变量**是否已设置**。
+- **路线**：明确 **Cursor 工兵不需要外部 API Key**；外部 API 工兵需要 provider / model / 环境变量中的 Key。
+- 向用户说明：`chief_config_help` **不会**验证远端 API 是否可用，只会检查配置文件与环境变量是否存在。
+
 # 首次路线选择 / 默认工兵路线（新手入口）
 
 面向 **vibe coding 业余创新者**：愿意尝试、怕麻烦、不必先懂架构；参谋要主动告诉用户怎么开始。
