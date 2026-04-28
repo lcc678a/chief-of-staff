@@ -1,11 +1,25 @@
 import { z } from "zod";
 import { getTask } from "../lib/tasks_store.js";
+import type { Task } from "../types.js";
 
 export const getWorkerSummaryInputSchema = z.object({
   task_id: z.string()
 });
 
 type GetWorkerSummaryInput = z.infer<typeof getWorkerSummaryInputSchema>;
+
+function effectiveModelForDisplay(task: Task): string {
+  return task.model ?? task.reported_model ?? task.suggested_model ?? "unknown";
+}
+
+function shouldShowCursorModelNote(task: Task): boolean {
+  return (
+    task.worker_route === "cursor_agent" &&
+    task.reported_model === "unknown" &&
+    !!task.suggested_model &&
+    task.suggested_model !== "user-selected"
+  );
+}
 
 export async function getWorkerSummary(rawInput: unknown): Promise<string> {
   const input: GetWorkerSummaryInput = getWorkerSummaryInputSchema.parse(rawInput);
@@ -15,6 +29,39 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
   }
 
   const workerRoute = task.worker_route ?? "external";
+
+  if (workerRoute === "cursor_agent" && task.status === "waiting_for_cursor_agent") {
+    const suggested = task.suggested_model ?? task.model ?? "(未指定)";
+    const pkg = task.agent_task_file ?? `.chief/agent-tasks/${task.id}.md`;
+    return `**${task.id}**
+
+- 任务：${task.id}
+- 状态：waiting_for_cursor_agent
+- 工兵路线：cursor_agent
+- 建议模型：${suggested}
+- 任务包文件：${pkg}
+
+下一步：打开任务包文件，复制全文给 Cursor 工兵窗口执行。`;
+  }
+
+  if (workerRoute === "cursor_agent" && task.status === "done") {
+    const effective = effectiveModelForDisplay(task);
+    const note = shouldShowCursorModelNote(task)
+      ? `\n- 说明：实际模型未由 Cursor 暴露，按建议模型记录`
+      : "";
+    const resultFileLine = task.result_file
+      ? `\n- 结果文件：${task.result_file}`
+      : "";
+
+    return `**${task.id}**
+
+- 任务：${task.id}
+- 状态：done
+- 工兵路线：cursor_agent
+- 工兵模型：cursor_agent / ${effective}
+- 摘要：${task.summary ?? ""}${resultFileLine}${note}`;
+  }
+
   const provider = task.provider ?? "unknown";
   const model = task.model ?? "unknown";
   const reportedModel = task.reported_model ? ` · reported_model=\`${task.reported_model}\`` : "";

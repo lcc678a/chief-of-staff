@@ -17,6 +17,25 @@ function toResultRelativePath(taskId: string): string {
   return `.chief/results/${taskId}.md`;
 }
 
+function computeEffectiveModel(task: {
+  suggested_model?: string;
+  reported_model_raw: string;
+}): { effectiveModel: string; usedSuggestedFallback: boolean } {
+  const raw = task.reported_model_raw;
+  const isUnknown = raw === "" || raw === "unknown";
+
+  if (!isUnknown) {
+    return { effectiveModel: raw, usedSuggestedFallback: false };
+  }
+
+  const suggested = task.suggested_model;
+  if (suggested && suggested !== "user-selected") {
+    return { effectiveModel: suggested, usedSuggestedFallback: true };
+  }
+
+  return { effectiveModel: "unknown", usedSuggestedFallback: false };
+}
+
 export async function submitWorkerResult(rawInput: unknown): Promise<string> {
   const input: SubmitWorkerResultInput = submitWorkerResultInputSchema.parse(rawInput);
   const task = await getTask(input.task_id);
@@ -27,41 +46,62 @@ export async function submitWorkerResult(rawInput: unknown): Promise<string> {
     return `任务 ${input.task_id} 当前状态是 ${task.status}，只有 waiting_for_cursor_agent 才能提交 Cursor 工兵结果。`;
   }
 
-  const reportedModel = input.reported_model?.trim() || "unknown";
+  const rawTrimmed = input.reported_model?.trim() ?? "";
+  const storedReported = rawTrimmed === "" ? "unknown" : rawTrimmed;
+
+  const { effectiveModel, usedSuggestedFallback } = computeEffectiveModel({
+    suggested_model: task.suggested_model,
+    reported_model_raw: storedReported
+  });
+
   const resultRelativePath = toResultRelativePath(task.id);
   const resultAbsolutePath = path.join(PROJECT_ROOT, resultRelativePath);
   await mkdir(path.dirname(resultAbsolutePath), { recursive: true });
 
+  const metaLines = [
+    `- suggested_model: ${task.suggested_model ?? "(none)"}`,
+    `- reported_model: ${storedReported}`,
+    `- effective_model: ${effectiveModel}`
+  ];
+  if (storedReported === "unknown" && usedSuggestedFallback) {
+    metaLines.push("- 说明：实际模型未由 Cursor 暴露，按建议模型记录。");
+  }
+  metaLines.push(`- submitted_at: ${new Date().toISOString()}`);
+
   const detailsContent = [
     `# ${task.id} Cursor Agent Result`,
     "",
-    `- summary: ${input.summary}`,
-    `- reported_model: ${reportedModel}`,
-    `- submitted_at: ${new Date().toISOString()}`,
+    ...metaLines,
     "",
     "## Details",
     "",
     input.details
   ].join("\n");
+
   await writeFile(resultAbsolutePath, detailsContent, "utf-8");
 
-  const finalModel = reportedModel !== "unknown" ? reportedModel : task.suggested_model ?? "user-selected";
   await updateTask(task.id, {
     status: "done",
     worker_route: "cursor_agent",
-    reported_model: reportedModel,
+    reported_model: storedReported,
     result_file: resultRelativePath,
     summary: input.summary,
     provider: "cursor_agent",
-    model: finalModel,
+    model: effectiveModel,
     finished_at: new Date().toISOString(),
     error: undefined
   });
+
+  const modelHint =
+    storedReported === "unknown" && usedSuggestedFallback
+      ? `\n- 说明：实际模型未由 Cursor 暴露，按建议模型记录`
+      : "";
 
   return `已提交 Cursor 工兵结果：${task.id}
 
 - 状态：done
 - 工兵路线：Cursor Agent Worker
-- reported_model：${reportedModel}
+- reported_model（原始）：${storedReported}
+- effective_model：${effectiveModel}${modelHint}
 - 结果文件：${resultRelativePath}`;
 }

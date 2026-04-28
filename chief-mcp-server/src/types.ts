@@ -8,6 +8,8 @@ export interface Task {
   worker_route?: "external" | "cursor_agent" | "host_assisted";
   suggested_model?: string;
   reported_model?: string;
+  /** Cursor Agent Worker 任务包文件路径，例如 .chief/agent-tasks/task-001.md */
+  agent_task_file?: string;
   result_file?: string;
   provider?: string;
   model?: string;

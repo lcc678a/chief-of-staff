@@ -3,6 +3,7 @@ import path from "node:path";
 import { z } from "zod";
 import { PROJECT_ROOT } from "../lib/paths.js";
 import { getTask } from "../lib/tasks_store.js";
+import type { Task } from "../types.js";
 
 export const getWorkerStatusInputSchema = z.object({
   task_id: z.string()
@@ -28,6 +29,19 @@ async function readLastLogLines(taskLogFile: string | undefined, n: number): Pro
   }
 }
 
+function effectiveModelForDisplay(task: Task): string {
+  return task.model ?? task.reported_model ?? task.suggested_model ?? "unknown";
+}
+
+function shouldShowCursorModelNote(task: Task): boolean {
+  return (
+    task.worker_route === "cursor_agent" &&
+    task.reported_model === "unknown" &&
+    !!task.suggested_model &&
+    task.suggested_model !== "user-selected"
+  );
+}
+
 export async function getWorkerStatus(rawInput: unknown): Promise<string> {
   const input: GetWorkerStatusInput = getWorkerStatusInputSchema.parse(rawInput);
   const task = await getTask(input.task_id);
@@ -37,6 +51,28 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
 
   const logs = await readLastLogLines(task.log_file ?? `.chief/logs/${task.id}.log`, 20);
   const workerRoute = task.worker_route ?? "external";
+
+  if (workerRoute === "cursor_agent") {
+    const displayModel = effectiveModelForDisplay(task);
+    const note = shouldShowCursorModelNote(task)
+      ? `\n说明：实际模型未由 Cursor 暴露，按建议模型记录。`
+      : "";
+    const agentFileLine = task.agent_task_file ? `\n- 任务包文件：\`${task.agent_task_file}\`` : "";
+    const resultFileLine = task.result_file ? `\n- 结果文件：\`${task.result_file}\`` : "";
+
+    return `**${task.id}** · \`${task.status}\` · route=\`cursor_agent\`
+
+工兵模型：cursor_agent / ${displayModel}${note}${agentFileLine}${resultFileLine}
+
+<details>
+<summary>📜 最近日志（最后 20 行）</summary>
+
+\`\`\`
+${logs}
+\`\`\`
+</details>`;
+  }
+
   const provider = task.provider ?? "unknown";
   const model = task.model ?? "unknown";
   const pidText = task.pid ? ` · pid=${task.pid}` : "";
