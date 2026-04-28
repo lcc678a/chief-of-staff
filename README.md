@@ -19,3 +19,4 @@ Hybrid usage is supported: External API Worker can handle research/batch analysi
 
 Complex workflows can use `depends_on` / `blocked_by` to avoid unsafe parallel execution. Dependencies complement lane and file scopes.
 Before preparing a Cursor worker task package, dependencies in `depends_on` should be done to prevent premature dispatch.
+Cursor Agents supports manual Rename: right-click an Agent in the Agents page and rename it using the suggested window name (for example `Cursor 工兵 - workflow`). Chief-of-Staff provides naming hints but does not auto-rename Cursor UI.

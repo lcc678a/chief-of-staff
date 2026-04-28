@@ -46,3 +46,4 @@ Cursor-first is the current MVP mainline, not Cursor-only.
 - Use External API Worker for custom provider/model usage, long or batch tasks, and text-only analysis.
 - Mixed route is recommended when needed: external worker for upstream analysis, Cursor worker for local code changes.
 - Dependencies complement lane and file scopes in complex project workflows.
+- For multi-window discoverability, use task-package first-line tag + suggested window name + worker board together; users can manually rename in Cursor Agents via right-click Agent → Rename.

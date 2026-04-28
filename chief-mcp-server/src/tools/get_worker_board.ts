@@ -113,20 +113,24 @@ export async function getWorkerBoard(rawInput: unknown): Promise<string> {
         routeLabel === "external"
           ? "\n- 说明：外部 API 工兵没有 Cursor 窗口"
           : routeLabel === "mixed"
-            ? "\n- 说明：本任务线同时包含 Cursor 工兵和外部 API 工兵"
+            ? "\n- 说明：本任务线同时包含 Cursor 工兵和外部 API 工兵\n- 提示：Cursor 工兵可在 Cursor Agents 页面右键对应 Agent → Rename，使用建议窗口名。"
+            : "\n- 提示：可在 Cursor Agents 页面右键对应 Agent → Rename，使用建议窗口名。";
+      const routeNoteTail =
+        routeLabel === "external"
+          ? ""
             : "";
       return `## ${lane}
 - 建议窗口：${windowHint}
 - 工兵路线：${routeLabel}
 - 有依赖任务：${dependencyCount}
 - 被阻塞任务：${blockedByCount}
-${statusLines}${routeNote}`;
+${statusLines}${routeNote}${routeNoteTail}`;
     })
     .join("\n\n");
 
   return `# 工兵看板
 
-说明：以下是 Chief-of-Staff 记录的任务线、建议窗口和工兵路线。Cursor 真实窗口名可能由 Cursor 自动生成；外部 API 工兵没有 Cursor 窗口。
+说明：以下是 Chief-of-Staff 记录的任务线、建议窗口和工兵路线。Cursor 真实窗口名可能由 Cursor 自动生成；可在 Cursor Agents 页面右键对应 Agent → Rename 使用建议窗口名；外部 API 工兵没有 Cursor 窗口。
 
 ${laneBlocks}
 

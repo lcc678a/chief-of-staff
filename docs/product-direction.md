@@ -32,6 +32,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 - External API Worker is especially important for user-owned provider/model strategy and scalable background execution.
 - Complex workflows should use depends_on/blocked_by and avoid unsafe parallelization of ordered tasks.
 - depends_on is not only a record field; it should be used as a safety gate before preparing downstream Cursor worker tasks.
+- Cursor window naming remains user-driven: Chief-of-Staff provides suggested names, and users can manually rename Agent windows in Cursor Agents.
 
 ## Future Directions
 

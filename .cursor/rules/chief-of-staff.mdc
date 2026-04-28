@@ -354,6 +354,14 @@ Chief-of-Staff 保留两条工兵路线：
 - 如果用户坚持提前执行，应先说明风险并让用户确认。
 - 工兵拿到任务后，如果发现前置结果缺失，应 blocked 回传，不要硬做。
 
+## Cursor Agent 手动命名
+
+- Chief-of-Staff 不能假设自己能自动重命名 Cursor Agent 窗口。
+- 当用户问怎么找工兵窗口、窗口太多、窗口名混乱时，提示：Cursor Agents 页面 → 右键对应 Agent → Rename。
+- 建议命名格式：Cursor 工兵 - {lane}
+- 任务包首行的【Chief-of-Staff 工兵窗口】标签仍作为辅助识别。
+- 不要声称 MCP 工具可以自动修改 Cursor UI 窗口名称。
+
 ## 重发同一任务的工兵任务包（禁止用新 task 顶替）
 
 用户要**再次拿到**可复制任务包、或说「重发 task-001 的任务包」时：**对同一 `task_id` 再次调用 `prepare_cursor_agent_task`**。只要该任务仍为 `waiting_for_cursor_agent` 且为 Cursor 工兵路线，工具会**重发任务包**，**禁止**为此再调 `plan_tasks` 新建 `task-002` 等重复任务。

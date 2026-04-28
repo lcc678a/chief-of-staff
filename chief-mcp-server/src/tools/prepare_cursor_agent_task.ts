@@ -55,6 +55,10 @@ function buildAgentTaskMarkdown(
 任务 ID：${taskId}
 任务线：${lane}
 建议窗口：${windowHint}
+窗口命名建议：
+请在 Cursor Agents 页面右键当前 Agent → Rename，命名为：
+${windowHint}
+
 窗口策略：如果已有同名 Cursor Agent 窗口，优先复用；否则新开窗口。
 建议模型：${suggestedModel}
 
