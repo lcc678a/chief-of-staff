@@ -376,13 +376,19 @@ Chief-of-Staff 保留两条工兵路线：
 若包含，最终回复必须：
 
 1. 提取两个 `USER_VISIBLE` 标记之间的内容。
-2. 原样输出该内容。
+2. 最终用户可见部分**只**输出上述内容（不展示 `USER_VISIBLE` 标记）；**任务包正文**不得增删改，但须同时满足下方第 9–14 条的代码围栏硬性要求（裸文本时必须补一层完整的 **text** 代码围栏：单独一行的开围栏、单独一行的闭围栏，见第 9 条）。
 3. 不展示 `USER_VISIBLE` 标记本身。
 4. 不展示 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START/END` 标记。
 5. 不再追加任何说明。
 6. 不输出“已准备任务/状态/工兵路线/工兵模型/备份文件/工具过程”。
 7. 不总结任务包内容。
 8. 代码块后禁止追加文字。
+9. 最终回复必须包含**一个**完整 Markdown 代码块：围栏开头须为单独一行、以三连反引号开头且紧随 **text**（即 Markdown 的 **text** 代码块语法），围栏结尾须为单独一行上的三连反引号闭合。
+10. 若提取 `USER_VISIBLE` 区块后发现任务包正文**没有**完全落在上述 **text** 代码围栏内，必须**重新**用同一套开闭围栏包一整层（围栏丢失时补围栏）。
+11. **禁止**输出裸任务包正文（提示行后直接跟 `【Chief-of-Staff 工兵窗口】` 等正文）。
+12. 代码块前**只能**有一行：`复制下面完整任务包，粘贴到新的 Cursor Agent / Agents Window 执行。`
+13. 代码块后**禁止**追加任何字符（含空行以外的说明）。
+14. 不要输出工兵路线、模型、状态、备份路径、工具过程说明。
 
 最终用户可见格式只能是：
 
@@ -392,7 +398,26 @@ Chief-of-Staff 保留两条工兵路线：
 完整任务包内容
 ```
 
-若工具返回暂未包含 `USER_VISIBLE` 标记，才回退到旧规则：提取 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START/END` 之间的唯一 `text` 代码块，用户可见内容仍只允许“1 行提示 + 代码块”，且代码块后禁止追加文字。
+错误示例（裸正文，不合格）——外层用四个反引号避免打断本 rules 文件的 Markdown：
+
+````markdown
+复制下面完整任务包，粘贴到新的 Cursor Agent / Agents Window 执行。
+
+【Chief-of-Staff 工兵窗口】lane=product-copy | task=task-001 | 建议窗口=...
+````
+
+正确示例（提示下一行即代码围栏）：
+
+````markdown
+复制下面完整任务包，粘贴到新的 Cursor Agent / Agents Window 执行。
+
+```text
+【Chief-of-Staff 工兵窗口】lane=product-copy | task=task-001 | 建议窗口=...
+...
+```
+````
+
+若工具返回暂未包含 `USER_VISIBLE` 标记，才回退到旧规则：提取 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START/END` 之间的唯一 **text** 代码块；若仅有裸正文则同样必须补 **text** 代码围栏。用户可见内容仍只允许“1 行提示 + 代码块”，且代码块后禁止追加文字。
 
 ## Cursor 工兵 outcome：blocked / failed（闭环）
 

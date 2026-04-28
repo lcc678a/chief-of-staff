@@ -164,24 +164,27 @@ function unmetDependencyReason(allTasks: Task[], depId: string): string {
   return depTask.status;
 }
 
-function formatToolReturn(
-  markdownBody: string
-): string {
+/** USER_VISIBLE / COPY_THIS 必须使用同一对开闭围栏，正文仅在围栏内。 */
+function wrapTaskPackageInTextFence(markdownBody: string): string {
+  const body = markdownBody.trimEnd();
+  const openFence = "```text\n";
+  const closeFence = "\n```";
+  return openFence + body + closeFence;
+}
+
+function formatToolReturn(markdownBody: string): string {
+  const fenced = wrapTaskPackageInTextFence(markdownBody);
   return `${USER_VISIBLE_CURSOR_AGENT_HANDOFF_START}
 
 复制下面完整任务包，粘贴到新的 Cursor Agent / Agents Window 执行。
 
-\`\`\`text
-${markdownBody}
-\`\`\`
+${fenced}
 
 ${USER_VISIBLE_CURSOR_AGENT_HANDOFF_END}
 
 ${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START}
 
-\`\`\`text
-${markdownBody}
-\`\`\`
+${fenced}
 
 ${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END}`;
 }

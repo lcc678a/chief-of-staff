@@ -25,7 +25,7 @@ Validate whether the Chief-of-Staff Cursor-first MVP can support baseline orches
 ## Smoke tests
 
 1. Run `chief_doctor` with empty tasks and verify baseline health output.
-2. Create one Cursor worker task and verify one-sentence handoff plus one code block format.
+2. Create one Cursor worker task and verify one-sentence handoff plus one ```text code block: Cursor UI must render a copyable code box, not plain text only; the task package first line must appear **inside** the fence.
 3. Paste task package into a new Cursor Agent and verify first-line labels and Rename guidance.
 4. Submit `submit_worker_result` with `outcome=done`.
 5. Submit `submit_worker_result` with `outcome=blocked`.
@@ -38,7 +38,7 @@ Validate whether the Chief-of-Staff Cursor-first MVP can support baseline orches
 ## Expected results
 
 1. `chief_doctor` returns no critical error on empty-task baseline.
-2. Handoff format stays constrained to one sentence + one `text` code block.
+2. Handoff format stays constrained to one sentence + one ```text code block; the chat must show a rendered Markdown code block / copy affordance, not bare task-package text with the first line outside any fence.
 3. Task header includes `lane` / `task_id` / `window_hint`, and package includes manual Rename hint.
 4. `outcome=done` moves task status to `done`.
 5. `outcome=blocked` moves task status to `blocked` and preserves actionable `needs`.

@@ -6,6 +6,9 @@ Check:
 
 - `prepare_cursor_agent_task` returns `USER_VISIBLE_CURSOR_AGENT_HANDOFF_START` / `USER_VISIBLE_CURSOR_AGENT_HANDOFF_END`.
 - `USER_VISIBLE` contains only one prompt sentence plus one ```text code block.
+- Final user-visible reply must include a **complete** ```text fenced code block (opening ```text and closing ```).
+- **No** bare task package outside a fence (failure if the package first line appears as normal paragraph text).
+- At most one prompt line before the fence; **no** text after the closing fence.
 - `COPY_THIS` marker still exists for backward compatibility.
 - Task package includes `task_id` / `suggested_model` / `lane` / `window_hint`.
 - Task package includes `submit_worker_result` examples for `done` / `blocked` / `failed`.
