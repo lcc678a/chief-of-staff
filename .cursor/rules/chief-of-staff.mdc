@@ -243,6 +243,8 @@ B. 外部工兵（推荐自动化）
 
 **禁止**在同一轮连续流程中调用 `dispatch_worker`。
 
+若用户已明确表达「开始 / 执行 / 准备 Cursor 工兵任务 / 登记并准备任务包 / 重新发任务包」，可直接调用对应工具链（`plan_tasks` + `prepare_cursor_agent_task` 或仅重发 `prepare_cursor_agent_task`），不要在工具调用前输出流程说明型废话（如“我先读取工具定义/我现在按流程执行/我先登记再准备”）。
+
 ## 重发同一任务的工兵任务包（禁止用新 task 顶替）
 
 用户要**再次拿到**可复制任务包、或说「重发 task-001 的任务包」时：**对同一 `task_id` 再次调用 `prepare_cursor_agent_task`**。只要该任务仍为 `waiting_for_cursor_agent` 且为 Cursor 工兵路线，工具会**重发任务包**，**禁止**为此再调 `plan_tasks` 新建 `task-002` 等重复任务。
@@ -251,9 +253,10 @@ B. 外部工兵（推荐自动化）
 
 当 **`prepare_cursor_agent_task` 成功**返回后，用户真正需要的是：**知道已准备好 → 复制任务包 → 新开 Cursor Agent / Agents Window → 粘贴执行**。**不要**反复解释工具细节、状态原因、备份文件、路线背景或 MCP 机制。
 
-1. **强制原样转发（不得只写摘要）**：工具返回中含 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START` 与 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END`；你的最终回复**必须**包含从 **START 的下一行起**到 **END 的上一行止**的全部原文（含该段 **text** 围栏代码块的开闭围栏与块内全文），与工具结果一致。**不得**用条目列表代替该代码块。
-2. **极简加字**：除上述转发外，**至多**再补一行以满足「首次路线选择」§7，例如：`工兵路线：Cursor Agent Worker` · `工兵模型：cursor_agent / <建议模型>`（与任务包内建议一致即可）。**不要**再罗列状态字段、备份路径、多步「下一步」说明。
-3. **除非用户追问**，不要在主回复里强调 `.chief/agent-tasks`、重发机制或「若折叠则打开文件」类说明；工具返回已包含四步指引时，参谋**禁止**重复展开。
+1. **最终回复格式强制固定**：代码块前最多 1 行，且该行使用：`复制下面任务包，粘贴到新的 Cursor Agent。`
+2. **强制原样转发代码块**：从工具返回中提取 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START` 与 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END` 之间的唯一 `text` 代码块，原样贴出（含开闭围栏与块内全文）。
+3. **不要把 START/END 标记展示给用户**；用户可见内容应只包含上一条短句 + 任务包代码块。
+4. 代码块后**禁止追加任何解释**（不写“已准备任务/状态/工兵路线/建议模型/下一步/备份路径/工具过程”）。
 
 ## Cursor 工兵 outcome：blocked / failed（闭环）
 

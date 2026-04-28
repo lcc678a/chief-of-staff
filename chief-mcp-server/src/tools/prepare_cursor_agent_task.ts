@@ -97,23 +97,9 @@ function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): strin
 }
 
 function formatToolReturn(
-  taskId: string,
-  suggestedModel: string,
-  markdownBody: string,
-  mode: "initial" | "resend"
+  markdownBody: string
 ): string {
-  const headline =
-    mode === "resend" ? `重发 Cursor 工兵任务包：${taskId}` : `已准备 Cursor 工兵任务：${taskId}`;
-
-  const modelStep =
-    suggestedModel === "user-selected" ? "自行选择" : suggestedModel;
-
-  return `${headline}
-
-1. 复制下面代码块
-2. 新建 Cursor Agent / Agents Window
-3. 选择模型：${modelStep}
-4. 粘贴执行
+  return `复制下面任务包，粘贴到新的 Cursor Agent。
 
 ${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START}
 
@@ -165,7 +151,7 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
       error: undefined,
       finished_at: undefined
     });
-    return formatToolReturn(task.id, suggestedModel, markdownBody, "initial");
+    return formatToolReturn(markdownBody);
   }
 
   await updateTask(input.task_id, {
@@ -177,5 +163,5 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
     error: undefined
   });
 
-  return formatToolReturn(task.id, suggestedModel, markdownBody, "resend");
+  return formatToolReturn(markdownBody);
 }
