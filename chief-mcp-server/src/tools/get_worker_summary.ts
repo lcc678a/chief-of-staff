@@ -51,9 +51,52 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
 
 - 任务：${task.id}
 - 状态：done
+- outcome：done
 - 工兵路线：cursor_agent
 - 工兵模型：cursor_agent / ${effective}
 - 摘要：${task.summary ?? ""}${resultFileLine}${note}`;
+  }
+
+  if (workerRoute === "cursor_agent" && task.status === "blocked") {
+    const effective = effectiveModelForDisplay(task);
+    const note = shouldShowCursorModelNote(task)
+      ? `\n- 说明：实际模型未由 Cursor 暴露，按建议模型记录`
+      : "";
+    const resultFileLine = task.result_file
+      ? `\n- 结果文件：${task.result_file}`
+      : "";
+
+    return `**${task.id}**
+
+- 任务：${task.id}
+- 状态：blocked
+- outcome：blocked
+- 工兵路线：cursor_agent
+- 工兵模型：cursor_agent / ${effective}
+- 摘要：${task.summary ?? ""}
+- 需要：${task.needs?.trim() || "（未填）"}${resultFileLine}${note}
+
+下一步：用户或参谋补充信息后，可重新拆任务或新建任务继续。`;
+  }
+
+  if (workerRoute === "cursor_agent" && task.status === "failed") {
+    const effective = effectiveModelForDisplay(task);
+    const note = shouldShowCursorModelNote(task)
+      ? `\n- 说明：实际模型未由 Cursor 暴露，按建议模型记录`
+      : "";
+    const resultFileLine = task.result_file
+      ? `\n- 结果文件：${task.result_file}`
+      : "";
+
+    return `**${task.id}**
+
+- 任务：${task.id}
+- 状态：failed
+- outcome：failed
+- 工兵路线：cursor_agent
+- 工兵模型：cursor_agent / ${effective}
+- 摘要：${task.summary ?? ""}
+- 错误：${task.error ?? ""}${resultFileLine}${note}`;
   }
 
   const provider = task.provider ?? "unknown";
@@ -62,7 +105,7 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
   const resultFile = task.result_file ? `\n- result_file: \`${task.result_file}\`` : "";
   const header = `**${task.id}** · \`${task.status}\` · route=\`${workerRoute}\` · provider=\`${provider}\` · model=\`${model}\`${reportedModel}`;
 
-  if (task.status !== "done") {
+  if (task.status !== "done" && task.status !== "blocked" && task.status !== "failed") {
     return `${header}
 
 Task ${task.id} is not done yet (status: ${task.status}).`;

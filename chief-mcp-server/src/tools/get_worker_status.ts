@@ -59,10 +59,21 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
       : "";
     const agentFileLine = task.agent_task_file ? `\n任务包文件：\`${task.agent_task_file}\`` : "";
     const resultFileLine = task.result_file ? `\n结果文件：\`${task.result_file}\`` : "";
+    const outcomeLine = task.outcome ? `\noutcome：${task.outcome}` : "";
+    const summaryLine =
+      task.summary && ["done", "blocked", "failed"].includes(task.status)
+        ? `\n摘要：${task.summary}`
+        : "";
+    const needsLine =
+      task.status === "blocked" ? `\n需要：${task.needs?.trim() || "（未填）"}` : "";
+    const errLine =
+      task.error && (task.status === "blocked" || task.status === "failed")
+        ? `\n错误/阻塞信息：${task.error}`
+        : "";
 
-    return `**${task.id}** · \`${task.status}\` · cursor_agent
+    return `**${task.id}** · \`${task.status}\` · cursor_agent${outcomeLine}
 
-工兵模型：cursor_agent / ${displayModel}${note}${agentFileLine}${resultFileLine}
+工兵模型：cursor_agent / ${displayModel}${note}${summaryLine}${needsLine}${errLine}${agentFileLine}${resultFileLine}
 
 <details>
 <summary>📜 最近日志（最后 20 行）</summary>

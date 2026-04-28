@@ -1,5 +1,11 @@
 export type ModelLevel = "cheap" | "smart" | "genius";
-export type TaskStatus = "pending" | "running" | "waiting_for_cursor_agent" | "done" | "failed";
+export type TaskStatus =
+  | "pending"
+  | "running"
+  | "waiting_for_cursor_agent"
+  | "blocked"
+  | "done"
+  | "failed";
 
 export interface Task {
   id: string;
@@ -17,6 +23,10 @@ export interface Task {
   created_at: string;
   updated_at: string;
   summary?: string;
+  /** Cursor 工兵 submit_worker_result 声明的结果类型 */
+  outcome?: "done" | "blocked" | "failed";
+  /** outcome 为 blocked 时：需要用户或参谋补充的内容 */
+  needs?: string;
   error?: string;
   log_file?: string;
   pid?: number;

@@ -6,6 +6,7 @@ import { getTask, updateTask } from "../lib/tasks_store.js";
 import type { Task } from "../types.js";
 
 const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START";
+const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END";
 
 export const prepareCursorAgentTaskInputSchema = z.object({
   task_id: z.string(),
@@ -34,18 +35,40 @@ ${extraInstructionsBlock}
 1. 只完成这个任务，不要顺手做无关优化。
 2. 如果需要读取项目文件，可以读取必要文件。
 3. 不要修改代码，除非任务描述明确要求。
-4. 完成后必须调用 MCP 工具 submit_worker_result 回传结果。
-5. reported_model：
-   - 如果你知道当前 Cursor 工兵窗口实际使用的模型，请填写实际模型。
-   - 如果你无法确认实际模型，请填写建议模型：${suggestedModel}。
-   - 不要填写 unknown，除非连建议模型也没有。
+4. 不要硬做、不要编造、不要把半成品当完成。
+5. reported_model：知道实际模型填实际模型；不知道就填建议模型 ${suggestedModel}；不要轻易填 unknown。
 
-请调用：
+回传（MCP：submit_worker_result）：
+
+如果你完成了任务，调用：
+
 submit_worker_result({
   "task_id": "${taskId}",
+  "outcome": "done",
   "reported_model": "${submitExampleReportedModel}",
   "summary": "一句话摘要",
   "details": "详细结果"
+})
+
+如果你被阻塞，不要硬做、不要编造结果。调用：
+
+submit_worker_result({
+  "task_id": "${taskId}",
+  "outcome": "blocked",
+  "reported_model": "${submitExampleReportedModel}",
+  "summary": "我被阻塞了：原因一句话",
+  "details": "已尝试什么、卡在哪里",
+  "needs": "需要用户或参谋确认什么"
+})
+
+如果任务失败，调用：
+
+submit_worker_result({
+  "task_id": "${taskId}",
+  "outcome": "failed",
+  "reported_model": "${submitExampleReportedModel}",
+  "summary": "任务失败：原因一句话",
+  "details": "错误信息和已尝试操作"
 })
 `;
 }
@@ -96,7 +119,9 @@ ${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START}
 
 \`\`\`text
 ${markdownBody}
-\`\`\``;
+\`\`\`
+
+${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END}`;
 }
 
 export async function prepareCursorAgentTask(rawInput: unknown): Promise<string> {
