@@ -3,6 +3,10 @@ import path from "node:path";
 import { z } from "zod";
 import { PROJECT_ROOT } from "../lib/paths.js";
 import { getTask, updateTask } from "../lib/tasks_store.js";
+import type { Task } from "../types.js";
+
+const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START";
+const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END";
 
 export const prepareCursorAgentTaskInputSchema = z.object({
   task_id: z.string(),
@@ -47,17 +51,12 @@ submit_worker_result({
 `;
 }
 
-export async function prepareCursorAgentTask(rawInput: unknown): Promise<string> {
-  const input: PrepareCursorAgentTaskInput = prepareCursorAgentTaskInputSchema.parse(rawInput);
-  const task = await getTask(input.task_id);
-  if (!task) {
-    return `任务不存在：${input.task_id}`;
-  }
-  if (task.status !== "pending") {
-    return `任务 ${input.task_id} 当前状态是 ${task.status}，只有 pending 才能准备为 Cursor 工兵任务。`;
-  }
+function resolveSuggestedModel(input: PrepareCursorAgentTaskInput, task: Task): string {
+  return input.suggested_model ?? task.suggested_model ?? task.model ?? "user-selected";
+}
 
-  const suggestedModel = input.suggested_model ?? "user-selected";
+function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): string {
+  const suggestedModel = resolveSuggestedModel(input, task);
   const extraInstructions = input.extra_instructions?.trim();
   const extraInstructionsBlock = extraInstructions
     ? `\n附加要求：\n${extraInstructions}\n\n`
@@ -66,34 +65,30 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
   const submitExampleReportedModel =
     suggestedModel !== "user-selected" ? suggestedModel : "composer-2-fast";
 
-  const markdownBody = buildAgentTaskMarkdown(
+  return buildAgentTaskMarkdown(
     task.id,
     task.description,
     suggestedModel,
     extraInstructionsBlock,
     submitExampleReportedModel
   );
+}
 
-  const agentTasksDir = path.join(PROJECT_ROOT, ".chief", "agent-tasks");
-  await mkdir(agentTasksDir, { recursive: true });
+function formatToolReturn(
+  taskId: string,
+  suggestedModel: string,
+  agentRelativePath: string,
+  markdownBody: string,
+  mode: "initial" | "resend"
+): string {
+  const headline =
+    mode === "resend"
+      ? `重发已有 Cursor 工兵任务包：${taskId}
 
-  const agentRelativePath = `.chief/agent-tasks/${task.id}.md`;
-  const agentAbsolutePath = path.join(PROJECT_ROOT, agentRelativePath);
-  await writeFile(agentAbsolutePath, markdownBody, "utf-8");
+说明：同一 task_id，未新建任务；以下为重新生成的任务包全文。`
+      : `已准备 Cursor 工兵任务：${taskId}`;
 
-  await updateTask(input.task_id, {
-    status: "waiting_for_cursor_agent",
-    worker_route: "cursor_agent",
-    suggested_model: suggestedModel,
-    agent_task_file: agentRelativePath,
-    provider: "cursor_agent",
-    model: suggestedModel,
-    started_at: new Date().toISOString(),
-    error: undefined,
-    finished_at: undefined
-  });
-
-  return `已准备 Cursor 工兵任务：${task.id}
+  return `${headline}
 
 - 状态：waiting_for_cursor_agent
 - 工兵路线：Cursor Agent Worker
@@ -108,8 +103,68 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
 
 下面是完整任务包，请整段复制：
 
+${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START}
+
 \`\`\`text
 ${markdownBody}
 \`\`\`
+
+${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END}
 `;
+}
+
+export async function prepareCursorAgentTask(rawInput: unknown): Promise<string> {
+  const input: PrepareCursorAgentTaskInput = prepareCursorAgentTaskInputSchema.parse(rawInput);
+  const task = await getTask(input.task_id);
+  if (!task) {
+    return `任务不存在：${input.task_id}`;
+  }
+
+  const { status, worker_route } = task;
+  const isCursorWaiting =
+    status === "waiting_for_cursor_agent" && worker_route === "cursor_agent";
+  const isPending = status === "pending";
+
+  if (!isPending && !isCursorWaiting) {
+    if (status === "waiting_for_cursor_agent" && worker_route !== "cursor_agent") {
+      return `任务 ${input.task_id} 当前状态为 waiting_for_cursor_agent，但工兵路线不是 cursor_agent，无法准备或重发 Cursor 工兵任务包。`;
+    }
+    return `任务 ${input.task_id} 当前状态为 ${status}，无法准备或重发 Cursor 工兵任务包。仅支持：pending（首次准备），或 waiting_for_cursor_agent 且工兵路线为 cursor_agent（重发任务包）。`;
+  }
+
+  const suggestedModel = resolveSuggestedModel(input, task);
+  const markdownBody = buildPackageBody(task, input);
+
+  const agentTasksDir = path.join(PROJECT_ROOT, ".chief", "agent-tasks");
+  await mkdir(agentTasksDir, { recursive: true });
+
+  const agentRelativePath = `.chief/agent-tasks/${task.id}.md`;
+  const agentAbsolutePath = path.join(PROJECT_ROOT, agentRelativePath);
+  await writeFile(agentAbsolutePath, markdownBody, "utf-8");
+
+  if (isPending) {
+    await updateTask(input.task_id, {
+      status: "waiting_for_cursor_agent",
+      worker_route: "cursor_agent",
+      suggested_model: suggestedModel,
+      agent_task_file: agentRelativePath,
+      provider: "cursor_agent",
+      model: suggestedModel,
+      started_at: new Date().toISOString(),
+      error: undefined,
+      finished_at: undefined
+    });
+    return formatToolReturn(task.id, suggestedModel, agentRelativePath, markdownBody, "initial");
+  }
+
+  await updateTask(input.task_id, {
+    agent_task_file: agentRelativePath,
+    suggested_model: suggestedModel,
+    model: suggestedModel,
+    provider: "cursor_agent",
+    worker_route: "cursor_agent",
+    error: undefined
+  });
+
+  return formatToolReturn(task.id, suggestedModel, agentRelativePath, markdownBody, "resend");
 }

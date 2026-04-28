@@ -41,7 +41,9 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
 - 建议模型：${suggested}
 - 备份文件：${pkg}
 
-下一步：在 \`prepare_cursor_agent_task\` 工具结果的完整任务包代码块右上角复制，粘贴到 Cursor 工兵窗口执行（备份路径仅供必要时查阅：${pkg}）。`;
+下一步：在 \`prepare_cursor_agent_task\` 工具结果的完整任务包代码块右上角复制，粘贴到 Cursor 工兵窗口执行（备份路径仅供必要时查阅：${pkg}）。
+
+如需再次获得可复制任务包：对同一 task_id 再次调用 \`prepare_cursor_agent_task\`（重发，勿新建任务）。`;
   }
 
   if (workerRoute === "cursor_agent" && task.status === "done") {

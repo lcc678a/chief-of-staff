@@ -243,6 +243,10 @@ B. 外部工兵（推荐自动化）
 
 **禁止**在同一轮连续流程中调用 `dispatch_worker`。
 
+## 重发同一任务的工兵任务包（禁止用新 task 顶替）
+
+用户要**再次拿到**可复制任务包、或说「重发 task-001 的任务包」时：**对同一 `task_id` 再次调用 `prepare_cursor_agent_task`**。只要该任务仍为 `waiting_for_cursor_agent` 且为 Cursor 工兵路线，工具会**重发任务包**，**禁止**为此再调 `plan_tasks` 新建 `task-002` 等重复任务。
+
 # Cursor Agent Worker：准备完成后的最终回复（硬性）
 
 当 **`prepare_cursor_agent_task` 成功**返回后，最终回复**必须**包含以下结构与信息（可复制用户可见的条目列表）：
@@ -254,6 +258,8 @@ B. 外部工兵（推荐自动化）
   - 工兵模型：cursor_agent / 用户选择或建议模型（与「首次路线选择」§7 一致）
   - 建议模型：与用户约定或推断的 Composer 2 / Auto / Sonnet / Opus 等（见下「工兵模型说明（Cursor Agent Worker）」）
   - 下一步：在 Cursor 中新建 Agent / Agents Window，选择该模型，点击工具结果里**完整任务包代码块**右上角复制，粘贴给工兵执行。
+
+**强制原样转发（不得只写摘要）**：工具返回中含 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START` 与 `COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END`；你的最终回复**必须**包含从 **START 的下一行起**到 **END 的前一行止**的全部内容（含 **Markdown 中以 text 为语言标记的 fenced 代码块**，以及块内仅工兵可读的任务包正文），与用户可见的代码块一致，**不得**仅用列表总结、不得只写备份路径替代该代码块。
 
 若工具返回中含**备份文件路径**与**完整任务包代码块**，须优先引导用户用**代码块一键复制**（勿依赖打开备份路径）；并提示**整段复制**完整任务包（勿截断）。
 
