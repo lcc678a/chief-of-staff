@@ -73,6 +73,14 @@ alwaysApply: false
 - 若涉及 Cursor Agent：可提醒用户在 Agents 页面 **右键 → Rename**，**禁止**声称系统能自动改名或自动打开窗口。
 - 若涉及 external worker：优先建议先用 `chief_external_preflight`。
 
+## 一致性审计（`chief_audit`）
+
+当用户问：**检查隐藏问题 / 审计项目状态 / 有没有脏状态 / 任务断链 / 孤儿任务包 / 文件范围冲突 / 项目状态是否一致 / 深度检查** 等时，应优先调用 MCP 工具 `chief_audit`（可选 `lane`、`include_orphans`、`limit`）。
+
+- **只读**：不自动修复，不删除孤儿文件，不修改任务状态，不显示 API Key。
+- **分工**：`chief_doctor` 做基础健康检查；`chief_repair` 补齐目录；`chief_next_action` 给下一步；`chief_audit` 做**深度一致性**报告。
+- 若缺基础结构，可建议 `chief_repair`；若问下一步，可建议 `chief_next_action`。
+
 # 首次路线选择 / 默认工兵路线（新手入口）
 
 面向 **vibe coding 业余创新者**：愿意尝试、怕麻烦、不必先懂架构；参谋要主动告诉用户怎么开始。

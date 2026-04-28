@@ -14,6 +14,7 @@
 - Before calling `dispatch_worker`, MCP `chief_external_preflight` can check a specific task (optional `task_id`): provider/model resolution, env key presence, `depends_on` all `done`, and soft hints when `worker_route` is Cursor or `allowed_files` is set. Read-only, no HTTP. Prefer Cursor Agent Worker for local code edits.
 - `dispatch_worker` itself blocks external dispatch when dependencies are not `done`, when the API key env is unset (variable name only in messages), or when a `cursor_agent` task is dispatched without explicit `provider`/`model`; failures suggest `chief_external_preflight` / `chief_config_help`.
 - MCP `chief_next_action` answers “what next?” from the current task list (same priority stack as above); it only advises—no automatic `prepare_cursor_agent_task`, `dispatch_worker`, or file writes.
+- MCP `chief_audit` scans for stale links, overlaps, orphan outputs, and schema-ish anomalies across tasks and `.chief/` artifacts without mutating anything.
 
 ## Standard Flow
 

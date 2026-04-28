@@ -39,6 +39,7 @@ Validate whether the Chief-of-Staff Cursor-first MVP can support baseline orches
 13. Run `chief_external_preflight` with/without `task_id`: read-only; no HTTP; no key values; `depends_on` not `done` → 暂不建议派发; output distinguishes preflight from `chief_config_help`.
 14. With external route: `dispatch_worker` rejects unfinished `depends_on`, rejects `cursor_agent` tasks unless `provider` or `model` is passed, and surfaces config/key errors with hints to `chief_external_preflight` / `chief_config_help` (no secrets).
 15. Run `chief_next_action`: output is Chinese Markdown with one primary recommendation; read-only; references queue priority order.
+16. Run `chief_audit`: Markdown sections for 总览 / 阻断问题 / 警告 / 信息; read-only; does not modify tasks or delete orphans.
 
 ## Expected results
 
@@ -57,6 +58,7 @@ Validate whether the Chief-of-Staff Cursor-first MVP can support baseline orches
 13. `chief_external_preflight` is read-only, never calls remote APIs, never prints secrets, and flags dependency/config blockers before `dispatch_worker`.
 14. `dispatch_worker` enforces dependency completion and basic external readiness before spawning a worker; does not leak API keys.
 15. `chief_next_action` stays read-only and does not imply that other tools ran automatically.
+16. `chief_audit` remains read-only and reports structural issues without auto-fix.
 
 ## Known limitations
 

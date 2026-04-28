@@ -31,5 +31,7 @@ The MCP tool `chief_external_preflight` (read-only) checks whether `dispatch_wor
 
 The MCP tool `chief_next_action` (read-only) summarizes what to do next from `.chief/tasks.json`: blocked → failed → waiting_for_cursor_agent → running → pending with unfinished deps → ready pending → all done; optional `lane` filter and `limit`. It suggests tools such as `plan_tasks`, `prepare_cursor_agent_task`, `chief_external_preflight`, `chief_repair`, but does not execute them.
 
+The MCP tool `chief_audit` (read-only) performs a deeper consistency audit: duplicate task ids, broken `depends_on`/`blocked_by`, invalid status/model_level, missing task-package or result files, blocked/failed metadata gaps, external tasks without provider/model, simple `allowed_files` overlaps among active tasks, and optional orphan files under `.chief/agent-tasks/` / `.chief/results/` (baseline `chief_doctor` stays lightweight). It never writes files or fixes data.
+
 Before preparing a Cursor worker task package, dependencies in `depends_on` should be done to prevent premature dispatch.
 Cursor Agents supports manual Rename: right-click an Agent in the Agents page and rename it using the suggested window name (for example `Cursor 工兵 - workflow`). Chief-of-Staff provides naming hints but does not auto-rename Cursor UI.

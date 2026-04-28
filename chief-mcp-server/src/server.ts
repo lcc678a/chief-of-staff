@@ -21,6 +21,7 @@ import {
   chiefExternalPreflightInputSchema
 } from "./tools/chief_external_preflight.js";
 import { chiefNextAction, chiefNextActionInputSchema } from "./tools/chief_next_action.js";
+import { chiefAudit, chiefAuditInputSchema } from "./tools/chief_audit.js";
 import { ensureDefaultConfigFile } from "./lib/config.js";
 
 function toJsonSchema(schema: ZodTypeAny): object {
@@ -105,6 +106,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         description:
           "Read-only next-step advisor from task queue (blocked/failed/waiting/running/pending/done); no writes or dispatch",
         inputSchema: toJsonSchema(chiefNextActionInputSchema)
+      },
+      {
+        name: "chief_audit",
+        description:
+          "Read-only consistency audit: duplicate ids, dependency links, missing artifacts, overlaps, orphans; no writes",
+        inputSchema: toJsonSchema(chiefAuditInputSchema)
       }
     ]
   };
@@ -150,6 +157,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       break;
     case "chief_next_action":
       text = await chiefNextAction(args);
+      break;
+    case "chief_audit":
+      text = await chiefAudit(args);
       break;
     default:
       throw new Error(`Unknown tool: ${request.params.name}`);

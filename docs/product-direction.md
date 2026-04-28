@@ -33,6 +33,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 - Before external dispatch, MCP `chief_external_preflight` validates readiness (task/config/deps, same provider/model rules as `dispatch_worker`) without writes or API calls; distinct from `chief_config_help` (config explanation vs dispatch safety).
 - `dispatch_worker` mirrors those readiness rules before spawning an external worker: unfinished `depends_on`, missing env key, missing provider/model/config, or `cursor_agent` tasks without explicit provider/model → no dispatch; messages reference `chief_external_preflight` / `chief_config_help`.
 - MCP `chief_next_action` compresses queue state into one actionable next step (priority: blocked → failed → waiting → running → pending-deps → ready pending → done); read-only, does not run other tools for the user.
+- MCP `chief_audit` reports hidden inconsistencies (duplicate ids, dependency breaks, missing artifacts, file-scope overlaps, orphans); read-only and non-destructive—distinct from `chief_doctor` (light health), `chief_repair` (layout repair), `chief_next_action` (what to do next).
 - Cursor-first is not Cursor-only: External API Worker remains a long-term route for user custom models and API-driven automation.
 - External API Worker is especially important for user-owned provider/model strategy and scalable background execution.
 - Complex workflows should use depends_on/blocked_by and avoid unsafe parallelization of ordered tasks.

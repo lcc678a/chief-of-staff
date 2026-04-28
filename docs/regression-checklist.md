@@ -19,6 +19,13 @@ Check:
 - Missing or invalid config handled with Chinese guidance (missing file → `chief_repair` hint; invalid JSON → manual fix).
 - Unknown `provider` argument yields short “not found” message.
 
+## chief_audit
+
+Check:
+
+- Optional `lane` / `include_orphans` (default true) / `limit` (default 10, max 20); read-only; no writes or deletes.
+- Handles missing/unparseable `tasks.json`; reports blockers (duplicate id, bad status/model_level, broken depends_on/blocked_by, self-depends), warnings (missing files, metadata gaps, external without provider/model, rules/config), `allowed_files` exact overlap among active tasks, orphan agent-tasks/results stems.
+
 ## chief_next_action
 
 Check:
