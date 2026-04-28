@@ -28,6 +28,55 @@ Check:
 - `window_hint` defaults to `Cursor 工兵 - {lane}`.
 - `status` / `summary` display `lane` and `window_hint`.
 
+## Lane and worker board
+
+Check:
+
+- `plan_tasks` can persist `lane` / `window_hint`.
+- `prepare_cursor_agent_task` defaults `lane=general` when missing.
+- Task package first line includes `lane` / `task_id` / `window_hint`.
+- `get_worker_board` shows tasks grouped by `lane`.
+- Worker board reminds users that Cursor Agents can be manually renamed.
+- External workers are not mislabeled as Cursor windows.
+
+## File scopes
+
+Check:
+
+- `allowed_files` / `forbidden_files` can be written into a task.
+- Task package displays file scope constraints inside the package body.
+- Worker replies `blocked` when asked to operate outside allowed scope.
+- `status` shows concrete file scope details.
+- `summary` shows file scope counts.
+
+## Dependencies
+
+Check:
+
+- `depends_on` / `blocked_by` can be written into a task.
+- `status` shows concrete dependency details.
+- `summary` shows dependency counts.
+- Worker board shows dependency statistics.
+- `prepare_cursor_agent_task` blocks dispatch when `depends_on` is unfinished.
+- Dispatch is allowed only when dependency status is `done`.
+
+## External API route
+
+Check:
+
+- User-defined `provider` / `model` are not overridden.
+- `chief_doctor` does not leak API keys.
+- External workers display `provider` / `model` in `status` / `summary` / `board`.
+- Rules clearly state Cursor-first does not mean Cursor-only.
+
+## Manual rename
+
+Check:
+
+- Task package includes the right-click Agent -> Rename reminder.
+- Worker board reminds users that manual Rename is available.
+- Docs explicitly state the system cannot auto-rename agent windows.
+
 ## Manual end-to-end smoke test
 
 Minimal steps:
