@@ -11,6 +11,7 @@
 
 - If `.chief/` or `tasks.json` is missing, the chief can run MCP `chief_repair` (`dry_run: true` first, optional) to create directories, an empty `tasks.json`, default `config.json` when absent, and `agent-tasks` / `results` folders. Existing `tasks.json` and `config.json` are never overwritten; invalid `tasks.json` must be fixed manually. Missing `chief-of-staff.mdc` is reported but not auto-generated.
 - For external API worker settings, MCP `chief_config_help` summarizes providers, models, `base_url`, and whether each `api_key_env` is set (never values); it does not call remote APIs. Cursor Agent Worker remains available without any API key.
+- Before calling `dispatch_worker`, MCP `chief_external_preflight` can check a specific task (optional `task_id`): provider/model resolution, env key presence, `depends_on` all `done`, and soft hints when `worker_route` is Cursor or `allowed_files` is set. Read-only, no HTTP. Prefer Cursor Agent Worker for local code edits.
 
 ## Standard Flow
 

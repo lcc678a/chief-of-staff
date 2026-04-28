@@ -95,7 +95,7 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
   const apiKeyStatus = keyEnvName
     ? (process.env[keyEnvName] ? "已配置（不显示内容）" : "未配置")
     : "未检查";
-  const routeSection = `\n## 工兵路线\n\n- Cursor 工兵：可用，用于本地交互式任务包执行\n- 外部 API 工兵：保留，用于自定义 API 模型和自动化任务\n  - provider：${provider}\n  - model：${model}\n  - API Key：${apiKeyStatus}\n  - 配置诊断：如需检查外部 API 的 provider / model / API Key 环境变量，请运行 \`chief_config_help\`。\n`;
+  const routeSection = `\n## 工兵路线\n\n- Cursor 工兵：可用，用于本地交互式任务包执行\n- 外部 API 工兵：保留，用于自定义 API 模型和自动化任务\n  - provider：${provider}\n  - model：${model}\n  - API Key：${apiKeyStatus}\n  - 配置诊断：如需检查外部 API 的 provider / model / API Key 环境变量，请运行 \`chief_config_help\`。\n  - 派发预检：外部 API 派发前可运行 \`chief_external_preflight\`（可选 \`task_id\`）。\n`;
 
   if (tasks.length === 0) {
     return `# Chief-of-Staff 体检

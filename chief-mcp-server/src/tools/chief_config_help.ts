@@ -278,5 +278,7 @@ function appendSuggestions(config: ChiefConfig, relevantIds: string[]): string {
     parts.push(`- 若任务以本地交互为主，可继续使用 **Cursor 工兵**，不依赖外部 API。`);
   }
 
+  parts.push(`- 派发外部工兵前可运行 \`chief_external_preflight\`（可选 \`task_id\` / \`provider\` / \`model\`），只读预检。`);
+
   return parts.join("\n");
 }

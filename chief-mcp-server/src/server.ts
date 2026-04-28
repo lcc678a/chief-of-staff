@@ -16,6 +16,10 @@ import { chiefDoctor, chiefDoctorInputSchema } from "./tools/chief_doctor.js";
 import { chiefRepair, chiefRepairInputSchema } from "./tools/chief_repair.js";
 import { getWorkerBoard, getWorkerBoardInputSchema } from "./tools/get_worker_board.js";
 import { chiefConfigHelp, chiefConfigHelpInputSchema } from "./tools/chief_config_help.js";
+import {
+  chiefExternalPreflight,
+  chiefExternalPreflightInputSchema
+} from "./tools/chief_external_preflight.js";
 import { ensureDefaultConfigFile } from "./lib/config.js";
 
 function toJsonSchema(schema: ZodTypeAny): object {
@@ -88,6 +92,12 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         description:
           "Read-only guide: external API provider config, model mapping, API key env presence (no values, no network)",
         inputSchema: toJsonSchema(chiefConfigHelpInputSchema)
+      },
+      {
+        name: "chief_external_preflight",
+        description:
+          "Read-only preflight before dispatch_worker: task/config/deps/route hints; no writes, no network, no secrets",
+        inputSchema: toJsonSchema(chiefExternalPreflightInputSchema)
       }
     ]
   };
@@ -127,6 +137,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       break;
     case "chief_config_help":
       text = await chiefConfigHelp(args);
+      break;
+    case "chief_external_preflight":
+      text = await chiefExternalPreflight(args);
       break;
     default:
       throw new Error(`Unknown tool: ${request.params.name}`);

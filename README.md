@@ -25,5 +25,7 @@ The MCP tool `chief_repair` creates missing `.chief/` directories, an empty `.ch
 
 The MCP tool `chief_config_help` (read-only) explains external API worker setup: `default_provider`, each provider's `base_url`, `api_key_env`, whether the env var is set (never the value), and `cheap` / `smart` / `genius` models. No network calls. Cursor Agent Worker does not need an external API key.
 
+The MCP tool `chief_external_preflight` (read-only) checks whether `dispatch_worker` can run for optional `task_id`: resolved provider/model (same precedence as dispatch), env key presence, `depends_on` completion, and route hints. No writes, no network, no secret values. Use it before external dispatch; use `chief_config_help` to understand config files.
+
 Before preparing a Cursor worker task package, dependencies in `depends_on` should be done to prevent premature dispatch.
 Cursor Agents supports manual Rename: right-click an Agent in the Agents page and rename it using the suggested window name (for example `Cursor 工兵 - workflow`). Chief-of-Staff provides naming hints but does not auto-rename Cursor UI.

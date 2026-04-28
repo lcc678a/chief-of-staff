@@ -19,6 +19,16 @@ Check:
 - Missing or invalid config handled with Chinese guidance (missing file → `chief_repair` hint; invalid JSON → manual fix).
 - Unknown `provider` argument yields short “not found” message.
 
+## chief_external_preflight
+
+Check:
+
+- Optional `task_id` / `provider` / `model`; read-only; no task/config writes; no HTTP.
+- Provider/model resolution matches `dispatch_worker`; reports config/key/base_url/model/deps issues in Chinese.
+- Env key status only 已配置 / 未配置 / 未检查; never prints values.
+- `depends_on` must all be `done`; otherwise lists blocking tasks.
+- Distinguishable from `chief_config_help` (dispatch readiness vs config explanation).
+
 ## Cursor worker handoff
 
 Check:

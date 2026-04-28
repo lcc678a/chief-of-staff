@@ -47,6 +47,16 @@ alwaysApply: false
 - **路线**：明确 **Cursor 工兵不需要外部 API Key**；外部 API 工兵需要 provider / model / 环境变量中的 Key。
 - 向用户说明：`chief_config_help` **不会**验证远端 API 是否可用，只会检查配置文件与环境变量是否存在。
 
+# 外部工兵派发预检查（`chief_external_preflight`）
+
+当用户问：**能不能用外部工兵 / external 能不能跑 / 派发前检查 / API 配好后能不能派发 / dispatch_worker 前检查 / 用我的 API 跑这个任务前先看一下** 等时，应调用 MCP 工具 `chief_external_preflight`（可选 `task_id` / `provider` / `model`）。
+
+- **只读**：不写任务状态，不写 `.chief/config.json`，**不**发起真实 API 请求，**不**显示 API Key。
+- **分工**：`chief_config_help` 解释**配置结构**；`chief_external_preflight` 判断**某次 external 派发是否就绪**（依赖、Key 是否存在、provider/model 是否可解析等）。
+- 若 **depends_on** 未全部 **done**，应提示**不建议**派发外部工兵，直到依赖完成。
+- 若任务偏**本地代码修改**，提示 **Cursor 工兵**可能更合适（提示即可，真正阻断仍以配置/依赖问题为准）。
+- 配置缺失时引导 `chief_config_help` 或 `chief_repair`。
+
 # 首次路线选择 / 默认工兵路线（新手入口）
 
 面向 **vibe coding 业余创新者**：愿意尝试、怕麻烦、不必先懂架构；参谋要主动告诉用户怎么开始。
