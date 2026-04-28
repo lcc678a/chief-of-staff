@@ -239,7 +239,7 @@ B. 外部工兵（推荐自动化）
 1. 调用 `plan_tasks`
 2. 从 `plan_tasks` 结果中识别 `task_id`
 3. 调用 `prepare_cursor_agent_task(task_id, suggested_model)`（`suggested_model` 与用户提到的 Composer 2 / Auto / Sonnet / Opus 等一致或合理推断）
-4. 给用户简洁说明下一步：复制任务包到 Cursor 工兵窗口（新 Agent / Agents Window）
+4. 给用户简洁说明下一步：在工具结果里用代码块右上角复制完整任务包，粘贴到 Cursor 工兵窗口（新 Agent / Agents Window）
 
 **禁止**在同一轮连续流程中调用 `dispatch_worker`。
 
@@ -253,9 +253,9 @@ B. 外部工兵（推荐自动化）
   - 工兵路线：Cursor Agent Worker
   - 工兵模型：cursor_agent / 用户选择或建议模型（与「首次路线选择」§7 一致）
   - 建议模型：与用户约定或推断的 Composer 2 / Auto / Sonnet / Opus 等（见下「工兵模型说明（Cursor Agent Worker）」）
-  - 下一步：在 Cursor 中新建 Agent / Agents Window，选择该模型，把**完整任务包**粘贴给工兵执行。
+  - 下一步：在 Cursor 中新建 Agent / Agents Window，选择该模型，点击工具结果里**完整任务包代码块**右上角复制，粘贴给工兵执行。
 
-若工具返回中含**任务包文件路径**或**任务包正文**，须提示用户**复制完整任务包**（勿截断）。
+若工具返回中含**备份文件路径**与**完整任务包代码块**，须优先引导用户用**代码块一键复制**（勿依赖打开备份路径）；并提示**整段复制**完整任务包（勿截断）。
 
 # 工兵模型说明（Cursor Agent Worker）
 

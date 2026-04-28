@@ -57,7 +57,7 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
     const note = shouldShowCursorModelNote(task)
       ? `\n说明：实际模型未由 Cursor 暴露，按建议模型记录。`
       : "";
-    const agentFileLine = task.agent_task_file ? `\n- 任务包文件：\`${task.agent_task_file}\`` : "";
+    const agentFileLine = task.agent_task_file ? `\n- 备份文件：\`${task.agent_task_file}\`` : "";
     const resultFileLine = task.result_file ? `\n- 结果文件：\`${task.result_file}\`` : "";
 
     return `**${task.id}** · \`${task.status}\` · route=\`cursor_agent\`

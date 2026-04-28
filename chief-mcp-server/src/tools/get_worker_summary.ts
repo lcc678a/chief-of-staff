@@ -39,9 +39,9 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
 - 状态：waiting_for_cursor_agent
 - 工兵路线：cursor_agent
 - 建议模型：${suggested}
-- 任务包文件：${pkg}
+- 备份文件：${pkg}
 
-下一步：打开任务包文件，复制全文给 Cursor 工兵窗口执行。`;
+下一步：在 \`prepare_cursor_agent_task\` 工具结果的完整任务包代码块右上角复制，粘贴到 Cursor 工兵窗口执行（备份路径仅供必要时查阅：${pkg}）。`;
   }
 
   if (workerRoute === "cursor_agent" && task.status === "done") {

@@ -23,7 +23,9 @@ function buildAgentTaskMarkdown(
 
 任务 ID：${taskId}
 建议模型：${suggestedModel}
-任务描述：${taskDescription}
+
+任务描述：
+${taskDescription}
 ${extraInstructionsBlock}
 执行要求：
 1. 只完成这个任务，不要顺手做无关优化。
@@ -58,7 +60,7 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
   const suggestedModel = input.suggested_model ?? "user-selected";
   const extraInstructions = input.extra_instructions?.trim();
   const extraInstructionsBlock = extraInstructions
-    ? `\n附加要求：\n${extraInstructions}\n`
+    ? `\n附加要求：\n${extraInstructions}\n\n`
     : "";
 
   const submitExampleReportedModel =
@@ -96,21 +98,18 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
 - 状态：waiting_for_cursor_agent
 - 工兵路线：Cursor Agent Worker
 - 建议模型：${suggestedModel}
-- 任务包文件：${agentRelativePath}
+- 备份文件：${agentRelativePath}
 
 下一步：
 1. 在 Cursor 中新建 Agent / Agents Window
 2. 选择建议模型，或选择你想使用的 Cursor 模型
-3. 打开 ${agentRelativePath}
-4. 复制全文给 Cursor 工兵执行
+3. 点击下面代码块右上角复制
+4. 粘贴给 Cursor 工兵执行
 
-如果工具结果被折叠，优先打开任务包文件复制全文。
-
----
-
-任务包正文（可复制；若上方路径更方便请打开文件）：
+下面是完整任务包，请整段复制：
 
 \`\`\`text
 ${markdownBody}
-\`\`\``;
+\`\`\`
+`;
 }
