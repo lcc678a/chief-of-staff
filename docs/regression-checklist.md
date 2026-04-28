@@ -29,6 +29,15 @@ Check:
 - `depends_on` must all be `done`; otherwise lists blocking tasks.
 - Distinguishable from `chief_config_help` (dispatch readiness vs config explanation).
 
+## dispatch_worker (external API)
+
+Check:
+
+- `depends_on` not all `done` → no `running` update, Chinese message listing incomplete deps + `chief_external_preflight` hint.
+- `worker_route === "cursor_agent"` without explicit `provider`/`model` in tool args → no dispatch; Chinese guidance.
+- Config read / missing provider / missing model / unset `api_key_env` / unset env → failure + short `chief_external_preflight` / `chief_config_help` hint; env **name** only, never values.
+- Provider/model resolution unchanged: `input` → `task` → `default_provider` / `models[model_level]`.
+
 ## Cursor worker handoff
 
 Check:

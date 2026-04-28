@@ -37,6 +37,7 @@ Validate whether the Chief-of-Staff Cursor-first MVP can support baseline orches
 11. Run `chief_repair` with `dry_run: true`, then optionally without dry run on a scratch copy: verify sections 已修复/预演、正常、需要人工处理; no API key text; existing `tasks.json` not overwritten.
 12. Run `chief_config_help` (with and without `provider`): summary sections present; no secret values; states that no live API call is made.
 13. Run `chief_external_preflight` with/without `task_id`: read-only; no HTTP; no key values; `depends_on` not `done` → 暂不建议派发; output distinguishes preflight from `chief_config_help`.
+14. With external route: `dispatch_worker` rejects unfinished `depends_on`, rejects `cursor_agent` tasks unless `provider` or `model` is passed, and surfaces config/key errors with hints to `chief_external_preflight` / `chief_config_help` (no secrets).
 
 ## Expected results
 
@@ -53,6 +54,7 @@ Validate whether the Chief-of-Staff Cursor-first MVP can support baseline orches
 11. `chief_repair` only fills missing paths; preserves valid existing `tasks.json` / `config.json`; surfaces invalid `tasks.json` without overwriting; default config creation does not leak keys; missing rules file yields a manual-restore message only.
 12. `chief_config_help` remains read-only, prints no env values, and does not imply API reachability—only config shape and env presence.
 13. `chief_external_preflight` is read-only, never calls remote APIs, never prints secrets, and flags dependency/config blockers before `dispatch_worker`.
+14. `dispatch_worker` enforces dependency completion and basic external readiness before spawning a worker; does not leak API keys.
 
 ## Known limitations
 
