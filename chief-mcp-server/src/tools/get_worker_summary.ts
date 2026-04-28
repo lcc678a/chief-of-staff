@@ -33,17 +33,9 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
   if (workerRoute === "cursor_agent" && task.status === "waiting_for_cursor_agent") {
     const suggested = task.suggested_model ?? task.model ?? "(未指定)";
     const pkg = task.agent_task_file ?? `.chief/agent-tasks/${task.id}.md`;
-    return `**${task.id}**
+    return `**${task.id}** · waiting_for_cursor_agent · cursor_agent · 建议模型：${suggested}
 
-- 任务：${task.id}
-- 状态：waiting_for_cursor_agent
-- 工兵路线：cursor_agent
-- 建议模型：${suggested}
-- 备份文件：${pkg}
-
-下一步：在 \`prepare_cursor_agent_task\` 工具结果的完整任务包代码块右上角复制，粘贴到 Cursor 工兵窗口执行（备份路径仅供必要时查阅：${pkg}）。
-
-如需再次获得可复制任务包：对同一 task_id 再次调用 \`prepare_cursor_agent_task\`（重发，勿新建任务）。`;
+复制上一则 prepare_cursor_agent_task 返回里的任务包代码块，新建 Cursor Agent 窗口粘贴执行。必要时打开：${pkg}。需重发：再调 prepare_cursor_agent_task（同 task_id）。`;
   }
 
   if (workerRoute === "cursor_agent" && task.status === "done") {

@@ -57,16 +57,12 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
     const note = shouldShowCursorModelNote(task)
       ? `\n说明：实际模型未由 Cursor 暴露，按建议模型记录。`
       : "";
-    const agentFileLine = task.agent_task_file ? `\n- 备份文件：\`${task.agent_task_file}\`` : "";
-    const resultFileLine = task.result_file ? `\n- 结果文件：\`${task.result_file}\`` : "";
-    const resendHint =
-      task.status === "waiting_for_cursor_agent"
-        ? `\n说明：若需再次获得完整可复制任务包，对同一 task_id 再次调用 \`prepare_cursor_agent_task\`（重发，勿新建任务）。`
-        : "";
+    const agentFileLine = task.agent_task_file ? `\n任务包文件：\`${task.agent_task_file}\`` : "";
+    const resultFileLine = task.result_file ? `\n结果文件：\`${task.result_file}\`` : "";
 
-    return `**${task.id}** · \`${task.status}\` · route=\`cursor_agent\`
+    return `**${task.id}** · \`${task.status}\` · cursor_agent
 
-工兵模型：cursor_agent / ${displayModel}${note}${agentFileLine}${resultFileLine}${resendHint}
+工兵模型：cursor_agent / ${displayModel}${note}${agentFileLine}${resultFileLine}
 
 <details>
 <summary>📜 最近日志（最后 20 行）</summary>

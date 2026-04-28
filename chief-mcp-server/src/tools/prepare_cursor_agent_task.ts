@@ -6,7 +6,6 @@ import { getTask, updateTask } from "../lib/tasks_store.js";
 import type { Task } from "../types.js";
 
 const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START";
-const COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END = "COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END";
 
 export const prepareCursorAgentTaskInputSchema = z.object({
   task_id: z.string(),
@@ -77,40 +76,27 @@ function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): strin
 function formatToolReturn(
   taskId: string,
   suggestedModel: string,
-  agentRelativePath: string,
   markdownBody: string,
   mode: "initial" | "resend"
 ): string {
   const headline =
-    mode === "resend"
-      ? `重发已有 Cursor 工兵任务包：${taskId}
+    mode === "resend" ? `重发 Cursor 工兵任务包：${taskId}` : `已准备 Cursor 工兵任务：${taskId}`;
 
-说明：同一 task_id，未新建任务；以下为重新生成的任务包全文。`
-      : `已准备 Cursor 工兵任务：${taskId}`;
+  const modelStep =
+    suggestedModel === "user-selected" ? "自行选择" : suggestedModel;
 
   return `${headline}
 
-- 状态：waiting_for_cursor_agent
-- 工兵路线：Cursor Agent Worker
-- 建议模型：${suggestedModel}
-- 备份文件：${agentRelativePath}
-
-下一步：
-1. 在 Cursor 中新建 Agent / Agents Window
-2. 选择建议模型，或选择你想使用的 Cursor 模型
-3. 点击下面代码块右上角复制
-4. 粘贴给 Cursor 工兵执行
-
-下面是完整任务包，请整段复制：
+1. 复制下面代码块
+2. 新建 Cursor Agent / Agents Window
+3. 选择模型：${modelStep}
+4. 粘贴执行
 
 ${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_START}
 
 \`\`\`text
 ${markdownBody}
-\`\`\`
-
-${COPY_THIS_CURSOR_AGENT_TASK_PACKAGE_END}
-`;
+\`\`\``;
 }
 
 export async function prepareCursorAgentTask(rawInput: unknown): Promise<string> {
@@ -154,7 +140,7 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
       error: undefined,
       finished_at: undefined
     });
-    return formatToolReturn(task.id, suggestedModel, agentRelativePath, markdownBody, "initial");
+    return formatToolReturn(task.id, suggestedModel, markdownBody, "initial");
   }
 
   await updateTask(input.task_id, {
@@ -166,5 +152,5 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
     error: undefined
   });
 
-  return formatToolReturn(task.id, suggestedModel, agentRelativePath, markdownBody, "resend");
+  return formatToolReturn(task.id, suggestedModel, markdownBody, "resend");
 }
