@@ -21,13 +21,26 @@ type PrepareCursorAgentTaskInput = z.infer<typeof prepareCursorAgentTaskInputSch
 function buildAgentTaskMarkdown(
   taskId: string,
   taskDescription: string,
+  allowedFiles: string[] | undefined,
+  forbiddenFiles: string[] | undefined,
   lane: string,
   windowHint: string,
   suggestedModel: string,
   extraInstructionsBlock: string,
   submitExampleReportedModel: string
 ): string {
-  return `你是 Chief-of-Staff 的 Cursor 工兵 Agent。
+  const allowedFilesText =
+    allowedFiles && allowedFiles.length > 0
+      ? allowedFiles.map((item) => `- ${item}`).join("\n")
+      : "- 未指定；只修改完成本任务所必需的最小范围。如需扩大范围，先回传 blocked。";
+  const forbiddenFilesText =
+    forbiddenFiles && forbiddenFiles.length > 0
+      ? forbiddenFiles.map((item) => `- ${item}`).join("\n")
+      : "- 未指定；仍不得修改与任务无关的文件。";
+
+  return `【Chief-of-Staff 工兵窗口】lane=${lane} | task=${taskId} | 建议窗口=${windowHint}
+
+你是 Chief-of-Staff 的 Cursor 工兵 Agent。
 
 任务 ID：${taskId}
 任务线：${lane}
@@ -38,6 +51,15 @@ function buildAgentTaskMarkdown(
 任务描述：
 ${taskDescription}
 ${extraInstructionsBlock}
+文件范围：
+允许修改：
+${allowedFilesText}
+
+禁止修改：
+${forbiddenFilesText}
+
+如果你认为必须修改 allowed_files 之外的文件，不要擅自修改。请调用 submit_worker_result，outcome=blocked，并在 needs 中说明需要扩大哪些文件范围以及原因。
+
 执行要求：
 1. 只完成这个任务，不要顺手做无关优化。
 2. 如果需要读取项目文件，可以读取必要文件。
@@ -99,6 +121,8 @@ function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): strin
   return buildAgentTaskMarkdown(
     task.id,
     task.description,
+    task.allowed_files,
+    task.forbidden_files,
     lane,
     windowHint,
     suggestedModel,

@@ -42,6 +42,23 @@ function shouldShowCursorModelNote(task: Task): boolean {
   );
 }
 
+function formatFileScopeSection(task: Task): string {
+  const allowed = task.allowed_files?.length ? task.allowed_files : undefined;
+  const forbidden = task.forbidden_files?.length ? task.forbidden_files : undefined;
+  if (!allowed && !forbidden) {
+    return "";
+  }
+
+  const parts: string[] = [];
+  if (allowed) {
+    parts.push(`\n允许修改：\n${allowed.map((item) => `- ${item}`).join("\n")}`);
+  }
+  if (forbidden) {
+    parts.push(`\n禁止修改：\n${forbidden.map((item) => `- ${item}`).join("\n")}`);
+  }
+  return parts.join("");
+}
+
 export async function getWorkerStatus(rawInput: unknown): Promise<string> {
   const input: GetWorkerStatusInput = getWorkerStatusInputSchema.parse(rawInput);
   const task = await getTask(input.task_id);
@@ -72,10 +89,11 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
       task.error && (task.status === "blocked" || task.status === "failed")
         ? `\n错误/阻塞信息：${task.error}`
         : "";
+    const fileScopeLine = formatFileScopeSection(task);
 
     return `**${task.id}** · \`${task.status}\` · cursor_agent${outcomeLine}
 
-工兵模型：cursor_agent / ${displayModel}${laneLine}${windowHintLine}${note}${summaryLine}${needsLine}${errLine}${agentFileLine}${resultFileLine}
+工兵模型：cursor_agent / ${displayModel}${laneLine}${windowHintLine}${note}${summaryLine}${needsLine}${errLine}${fileScopeLine}${agentFileLine}${resultFileLine}
 
 <details>
 <summary>📜 最近日志（最后 20 行）</summary>
@@ -96,8 +114,10 @@ ${logs}
       : task.status === "failed"
         ? ` · error=${task.error ?? "(unknown)"}`
         : "";
+  const fileScopeLine = formatFileScopeSection(task);
 
   return `**${task.id}** · \`${task.status}\` · route=\`${workerRoute}\` · provider=\`${provider}\` · model=\`${model}\`${pidText}${resultText}${tailLine}
+${fileScopeLine}
 
 <details>
 <summary>📜 最近日志（最后 20 行）</summary>

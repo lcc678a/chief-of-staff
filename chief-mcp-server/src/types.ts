@@ -11,6 +11,10 @@ export interface Task {
   id: string;
   description: string;
   model_level: ModelLevel;
+  /** 允许修改的文件、目录或路径范围 */
+  allowed_files?: string[];
+  /** 禁止修改的文件、目录或路径范围 */
+  forbidden_files?: string[];
   lane?: string;
   window_hint?: string;
   worker_route?: "external" | "cursor_agent" | "host_assisted";

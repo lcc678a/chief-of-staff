@@ -4,10 +4,14 @@ import { readTasks, writeTasks } from "../lib/tasks_store.js";
 
 const planTasksInputSchema = z.object({
   lane: z.string().optional(),
+  allowed_files: z.array(z.string()).optional(),
+  forbidden_files: z.array(z.string()).optional(),
   tasks: z.array(
     z.object({
       description: z.string(),
-      model_level: z.enum(["cheap", "smart", "genius"])
+      model_level: z.enum(["cheap", "smart", "genius"]),
+      allowed_files: z.array(z.string()).optional(),
+      forbidden_files: z.array(z.string()).optional()
     })
   )
 });
@@ -46,10 +50,14 @@ export async function planTasks(rawInput: unknown): Promise<string> {
   const now = new Date().toISOString();
   const newTasks: Task[] = input.tasks.map((task, index) => {
     const taskId = buildTaskId(maxTaskNumber + index + 1);
+    const allowedFiles = task.allowed_files ?? input.allowed_files;
+    const forbiddenFiles = task.forbidden_files ?? input.forbidden_files;
     return {
       id: taskId,
       description: task.description,
       model_level: task.model_level as ModelLevel,
+      allowed_files: allowedFiles,
+      forbidden_files: forbiddenFiles,
       lane: input.lane,
       status: "pending",
       created_at: now,

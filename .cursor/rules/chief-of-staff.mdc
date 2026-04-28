@@ -258,6 +258,47 @@ B. 外部工兵（推荐自动化）
 
 并行派发多个 Cursor 工兵任务前，必须尽量确保不同任务修改的文件范围不重叠；如果可能重叠，应串行执行或先让用户确认。
 
+## Cursor 工兵文件范围
+
+当准备 Cursor 工兵任务时：
+
+- 如果用户明确指定了文件、目录、模块或范围，应传入 allowed_files。
+- 如果任务不应修改运行状态或配置文件，应传入 forbidden_files。
+- 常见禁止修改项包括：
+  - .chief/tasks.json
+  - .chief/config.json
+  - package.json
+  - .gitignore
+  - 与任务无关的 docs 或源码
+- 并行派发多个 Cursor 工兵任务前，应尽量确保 allowed_files 不重叠。
+- 如果文件范围可能重叠，应串行执行或先问用户确认。
+- 如果工兵发现必须修改 allowed_files 之外的文件，应 blocked 回传，不要擅自扩大范围。
+- 最终用户可见交接回复仍只能是一句话 + 代码块，不要在代码块外解释文件范围。
+
+## 工兵看板
+
+当用户问：
+- 我现在有哪些工兵窗口
+- 哪些任务在等工兵
+- 哪个窗口该继续
+- 当前多 Agent 状态
+- 工兵看板
+
+应优先调用 get_worker_board。
+
+回答时要说明：
+- Cursor 真实窗口名可能由 Cursor 自动生成
+- Chief-of-Staff 显示的是建议窗口 / lane / task_id
+- 用户应根据任务包首行的【Chief-of-Staff 工兵窗口】标签识别窗口
+
+但回答要简短，不要长篇解释。
+
+Chief-of-Staff 保留两条工兵路线：
+- Cursor 工兵：适合本地交互式代码修改
+- 外部工兵：适合自动化、批量、长任务或 API 驱动任务
+
+新增 worker board 不应删除、覆盖或弱化 external worker 路线。
+
 ## 重发同一任务的工兵任务包（禁止用新 task 顶替）
 
 用户要**再次拿到**可复制任务包、或说「重发 task-001 的任务包」时：**对同一 `task_id` 再次调用 `prepare_cursor_agent_task`**。只要该任务仍为 `waiting_for_cursor_agent` 且为 Cursor 工兵路线，工具会**重发任务包**，**禁止**为此再调 `plan_tasks` 新建 `task-002` 等重复任务。
