@@ -3,6 +3,7 @@ import type { ModelLevel, Task } from "../types.js";
 import { readTasks, writeTasks } from "../lib/tasks_store.js";
 
 const planTasksInputSchema = z.object({
+  lane: z.string().optional(),
   tasks: z.array(
     z.object({
       description: z.string(),
@@ -49,6 +50,7 @@ export async function planTasks(rawInput: unknown): Promise<string> {
       id: taskId,
       description: task.description,
       model_level: task.model_level as ModelLevel,
+      lane: input.lane,
       status: "pending",
       created_at: now,
       updated_at: now

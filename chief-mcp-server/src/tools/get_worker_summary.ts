@@ -29,11 +29,13 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
   }
 
   const workerRoute = task.worker_route ?? "external";
+  const laneLine = task.lane ? `\n- 任务线：${task.lane}` : "";
+  const windowHintLine = task.window_hint ? `\n- 建议窗口：${task.window_hint}` : "";
 
   if (workerRoute === "cursor_agent" && task.status === "waiting_for_cursor_agent") {
     const suggested = task.suggested_model ?? task.model ?? "(未指定)";
     const pkg = task.agent_task_file ?? `.chief/agent-tasks/${task.id}.md`;
-    return `**${task.id}** · waiting_for_cursor_agent · cursor_agent · 建议模型：${suggested}
+    return `**${task.id}** · waiting_for_cursor_agent · cursor_agent · 建议模型：${suggested}${laneLine}${windowHintLine}
 
 复制上一则 prepare_cursor_agent_task 返回里的任务包代码块，新建 Cursor Agent 窗口粘贴执行。必要时打开：${pkg}。需重发：再调 prepare_cursor_agent_task（同 task_id）。`;
   }
@@ -54,7 +56,7 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
 - outcome：done
 - 工兵路线：cursor_agent
 - 工兵模型：cursor_agent / ${effective}
-- 摘要：${task.summary ?? ""}${resultFileLine}${note}`;
+- 摘要：${task.summary ?? ""}${laneLine}${windowHintLine}${resultFileLine}${note}`;
   }
 
   if (workerRoute === "cursor_agent" && task.status === "blocked") {
@@ -74,7 +76,7 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
 - 工兵路线：cursor_agent
 - 工兵模型：cursor_agent / ${effective}
 - 摘要：${task.summary ?? ""}
-- 需要：${task.needs?.trim() || "（未填）"}${resultFileLine}${note}
+- 需要：${task.needs?.trim() || "（未填）"}${laneLine}${windowHintLine}${resultFileLine}${note}
 
 下一步：用户或参谋补充信息后，可重新拆任务或新建任务继续。`;
   }
@@ -96,7 +98,7 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
 - 工兵路线：cursor_agent
 - 工兵模型：cursor_agent / ${effective}
 - 摘要：${task.summary ?? ""}
-- 错误：${task.error ?? ""}${resultFileLine}${note}`;
+- 错误：${task.error ?? ""}${laneLine}${windowHintLine}${resultFileLine}${note}`;
   }
 
   const provider = task.provider ?? "unknown";

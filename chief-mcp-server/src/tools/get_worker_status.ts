@@ -54,6 +54,8 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
 
   if (workerRoute === "cursor_agent") {
     const displayModel = effectiveModelForDisplay(task);
+    const laneLine = task.lane ? `\n任务线：${task.lane}` : "";
+    const windowHintLine = task.window_hint ? `\n建议窗口：${task.window_hint}` : "";
     const note = shouldShowCursorModelNote(task)
       ? `\n说明：实际模型未由 Cursor 暴露，按建议模型记录。`
       : "";
@@ -73,7 +75,7 @@ export async function getWorkerStatus(rawInput: unknown): Promise<string> {
 
     return `**${task.id}** · \`${task.status}\` · cursor_agent${outcomeLine}
 
-工兵模型：cursor_agent / ${displayModel}${note}${summaryLine}${needsLine}${errLine}${agentFileLine}${resultFileLine}
+工兵模型：cursor_agent / ${displayModel}${laneLine}${windowHintLine}${note}${summaryLine}${needsLine}${errLine}${agentFileLine}${resultFileLine}
 
 <details>
 <summary>📜 最近日志（最后 20 行）</summary>

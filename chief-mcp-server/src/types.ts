@@ -11,6 +11,8 @@ export interface Task {
   id: string;
   description: string;
   model_level: ModelLevel;
+  lane?: string;
+  window_hint?: string;
   worker_route?: "external" | "cursor_agent" | "host_assisted";
   suggested_model?: string;
   reported_model?: string;

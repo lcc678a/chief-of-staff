@@ -21,6 +21,8 @@ type PrepareCursorAgentTaskInput = z.infer<typeof prepareCursorAgentTaskInputSch
 function buildAgentTaskMarkdown(
   taskId: string,
   taskDescription: string,
+  lane: string,
+  windowHint: string,
   suggestedModel: string,
   extraInstructionsBlock: string,
   submitExampleReportedModel: string
@@ -28,6 +30,9 @@ function buildAgentTaskMarkdown(
   return `你是 Chief-of-Staff 的 Cursor 工兵 Agent。
 
 任务 ID：${taskId}
+任务线：${lane}
+建议窗口：${windowHint}
+窗口策略：如果已有同名 Cursor Agent 窗口，优先复用；否则新开窗口。
 建议模型：${suggestedModel}
 
 任务描述：
@@ -81,6 +86,8 @@ function resolveSuggestedModel(input: PrepareCursorAgentTaskInput, task: Task): 
 
 function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): string {
   const suggestedModel = resolveSuggestedModel(input, task);
+  const lane = task.lane?.trim() || "general";
+  const windowHint = task.window_hint?.trim() || `Cursor 工兵 - ${lane}`;
   const extraInstructions = input.extra_instructions?.trim();
   const extraInstructionsBlock = extraInstructions
     ? `\n附加要求：\n${extraInstructions}\n\n`
@@ -92,6 +99,8 @@ function buildPackageBody(task: Task, input: PrepareCursorAgentTaskInput): strin
   return buildAgentTaskMarkdown(
     task.id,
     task.description,
+    lane,
+    windowHint,
     suggestedModel,
     extraInstructionsBlock,
     submitExampleReportedModel
@@ -140,6 +149,8 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
   }
 
   const suggestedModel = resolveSuggestedModel(input, task);
+  const lane = task.lane?.trim() || "general";
+  const windowHint = task.window_hint?.trim() || `Cursor 工兵 - ${lane}`;
   const markdownBody = buildPackageBody(task, input);
 
   const agentTasksDir = path.join(PROJECT_ROOT, ".chief", "agent-tasks");
@@ -153,6 +164,8 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
     await updateTask(input.task_id, {
       status: "waiting_for_cursor_agent",
       worker_route: "cursor_agent",
+      lane,
+      window_hint: windowHint,
       suggested_model: suggestedModel,
       agent_task_file: agentRelativePath,
       provider: "cursor_agent",
@@ -165,6 +178,8 @@ export async function prepareCursorAgentTask(rawInput: unknown): Promise<string>
   }
 
   await updateTask(input.task_id, {
+    lane,
+    window_hint: windowHint,
     agent_task_file: agentRelativePath,
     suggested_model: suggestedModel,
     model: suggestedModel,
