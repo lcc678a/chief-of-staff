@@ -1,6 +1,7 @@
 import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
+import { readConfigSafe } from "../lib/config.js";
 import { PROJECT_ROOT, TASKS_FILE } from "../lib/paths.js";
 import type { Task, TaskStatus } from "../types.js";
 
@@ -86,7 +87,15 @@ export async function chiefDoctor(rawInput: unknown): Promise<string> {
   const cursorRulesExists = await exists(
     path.join(PROJECT_ROOT, ".cursor", "rules", "chief-of-staff.mdc")
   );
-  const routeSection = `\n## 工兵路线\n\n- Cursor 工兵：可用，用于本地交互式任务包执行\n- 外部 API 工兵：保留，用于自定义 API 模型和自动化任务；体检不会显示 API Key\n`;
+  const config = await readConfigSafe();
+  const provider = config?.default_provider ?? "未知";
+  const providerConfig = provider !== "未知" ? config?.providers?.[provider] : undefined;
+  const model = providerConfig?.models?.smart ?? providerConfig?.models?.cheap ?? "未知";
+  const keyEnvName = providerConfig?.api_key_env;
+  const apiKeyStatus = keyEnvName
+    ? (process.env[keyEnvName] ? "已配置（不显示内容）" : "未配置")
+    : "未检查";
+  const routeSection = `\n## 工兵路线\n\n- Cursor 工兵：可用，用于本地交互式任务包执行\n- 外部 API 工兵：保留，用于自定义 API 模型和自动化任务\n  - provider：${provider}\n  - model：${model}\n  - API Key：${apiKeyStatus}\n`;
 
   if (tasks.length === 0) {
     return `# Chief-of-Staff 体检

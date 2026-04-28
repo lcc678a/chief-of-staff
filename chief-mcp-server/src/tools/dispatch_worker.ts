@@ -6,7 +6,9 @@ import { PROJECT_ROOT } from "../lib/paths.js";
 import { getTask, updateTask } from "../lib/tasks_store.js";
 
 export const dispatchWorkerInputSchema = z.object({
-  task_id: z.string()
+  task_id: z.string(),
+  provider: z.string().optional(),
+  model: z.string().optional()
 });
 
 type DispatchWorkerInput = z.infer<typeof dispatchWorkerInputSchema>;
@@ -22,13 +24,13 @@ export async function dispatchWorker(rawInput: unknown): Promise<string> {
   }
 
   const config = await readConfig();
-  const providerName = config.default_provider;
+  const providerName = input.provider ?? task.provider ?? config.default_provider;
   const providerConfig = config.providers[providerName];
   if (!providerConfig) {
     return `派发失败：未找到 provider 配置（${providerName}）。`;
   }
 
-  const model = providerConfig.models[task.model_level];
+  const model = input.model ?? task.model ?? providerConfig.models[task.model_level];
   if (!model) {
     return `派发失败：provider ${providerName} 未配置 model_level=${task.model_level} 的模型。`;
   }

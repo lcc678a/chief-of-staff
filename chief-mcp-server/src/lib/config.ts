@@ -27,6 +27,14 @@ export async function readConfig(): Promise<ChiefConfig> {
   return JSON.parse(raw) as ChiefConfig;
 }
 
+export async function readConfigSafe(): Promise<ChiefConfig | null> {
+  try {
+    return await readConfig();
+  } catch {
+    return null;
+  }
+}
+
 export async function ensureDefaultConfigFile(): Promise<void> {
   try {
     await readFile(CONFIG_FILE, "utf-8");

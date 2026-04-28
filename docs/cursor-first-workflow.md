@@ -5,6 +5,7 @@
 - Main window: Chief-of-Staff (planning and coordination).
 - Worker windows: Cursor Agent Worker (execution).
 - External API Worker is also supported for API-key based custom models and automation tasks.
+- When user intent is "my API/custom model/backend run", prefer External API Worker instead of Cursor worker windows.
 
 ## Standard Flow
 

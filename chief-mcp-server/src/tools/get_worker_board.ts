@@ -107,10 +107,16 @@ export async function getWorkerBoard(rawInput: unknown): Promise<string> {
       const statusLines = DISPLAY_STATUSES.map(
         (status) => `- ${status}：${listIdsByStatus(laneTasks, status)}`
       ).join("\n");
+      const routeNote =
+        routeLabel === "external"
+          ? "\n- 说明：外部 API 工兵没有 Cursor 窗口"
+          : routeLabel === "mixed"
+            ? "\n- 说明：本任务线同时包含 Cursor 工兵和外部 API 工兵"
+            : "";
       return `## ${lane}
 - 建议窗口：${windowHint}
 - 工兵路线：${routeLabel}
-${statusLines}`;
+${statusLines}${routeNote}`;
     })
     .join("\n\n");
 
