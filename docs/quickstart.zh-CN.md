@@ -1,5 +1,7 @@
 # Chief-of-Staff 快速开始
 
+英文产品概览见仓库根目录 [README.md](../README.md)。
+
 ## 安装 MCP（Cursor）
 
 - **试用当前仓库**：在 `chief-mcp-server` 下 `npm install` 与 `npm run build`，再在 Cursor MCP 配置里指向本机的 `dist/server.js`（见 [docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md) 方式 A）。可复制 `.cursor/mcp.json.example` 为 `.cursor/mcp.json` 后改路径。

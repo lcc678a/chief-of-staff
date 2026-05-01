@@ -1,5 +1,7 @@
 # 在 Cursor 中安装 Chief-of-Staff
 
+英文产品介绍与 Cursor 配置要点见仓库根目录 [README.md](../README.md)。
+
 ## 当前状态
 
 - 当前为 **v0.1 candidate**。
