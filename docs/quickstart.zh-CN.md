@@ -6,6 +6,36 @@
 - **将来包发布到 npm 后**：可用 `npx -y <package-name>` 安装（以 `chief-mcp-server/package.json` 的 `name` 为准；详见同一文档方式 B）。
 - 完整步骤与 FAQ：**[docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md)**。
 
+## 选择使用模式
+
+更完整说明见 **[docs/product-principles.zh-CN.md](./product-principles.zh-CN.md)**。
+
+### 单主参谋模式
+
+适合新手和小任务。
+
+建议先问：
+
+```text
+下一步做什么？
+```
+
+### 主参谋 + 工兵模式
+
+适合任务变多时。
+
+建议：
+
+```text
+把不需要我持续参与的任务交给工兵。
+```
+
+说明：
+
+- 工兵能节省主对话上下文。
+- 用户仍主要面对主参谋。
+- 工兵窗口需要按建议**手动 Rename**（系统不会自动改名）。
+
 ## 1. 打开项目
 
 示例路径：

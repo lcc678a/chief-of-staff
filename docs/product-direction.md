@@ -74,6 +74,14 @@ Stage 2 候选（与发布说明对齐）：
 - **当前尚未集成**：仓库与 MCP 主流程**不包含** `@cursor/sdk` 依赖，也**未实现**上述工具。
 - **手动 Cursor worker 路线**（`prepare_cursor_agent_task` + 用户复制到 Agents + `submit_worker_result`）仍是 **Stage 1 及近期的稳定路径**与 **fallback**。
 
+## Product principles
+
+- **Keep the main AI and the user synchronized:** the user should always know what is in flight, what is next, and which task lives in which worker / Agent surface; the chief compresses state into a clear next step.
+- **One visible chief agent; tools stay behind the workflow:** doctor / audit / next_action / prepare / dispatch are implementation details—the experience is “I ask the chief; the chief tells me what to do next,” not “I manage a pile of tool names.”
+- **Short main context; workers for isolated tasks:** split work into tasks, push execution that does not need the user’s ongoing presence to workers, and bring back concise summaries; the chief stays grounded via `.chief/` state and summaries, not endless chat history.
+- **Two recommended modes:** single-chief mode for beginners and small efforts; chief + workers when the project grows and parallelization or context savings matter (see [docs/product-principles.zh-CN.md](product-principles.zh-CN.md)).
+- **Known UX issues (not fixed in v0.1 narrative):** task-package display in the Cursor/MCP chain may be compressed or unstable; Agent window naming still relies on the user’s manual Rename—stronger naming conventions are a follow-up.
+
 ## Future Directions
 
 - Marketplace

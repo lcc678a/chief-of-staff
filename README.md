@@ -6,6 +6,8 @@
 **Scope:** Cursor-first but not Cursor-only（以 Cursor 为主战场，同时保留外部 API 工兵路线）。  
 **v0.1：** 优先交付可安装的 **Cursor MCP** 产品包（`chief-mcp-server`）；不宣称已支持 Claude Code / Trae / Workbody。
 
+Chief-of-Staff 的目标是让用户始终面对一个清醒的主参谋，而不是管理一堆 AI 工具。
+
 ## Documentation
 
 | Doc | Description |
@@ -18,6 +20,7 @@
 | [docs/stage-1-acceptance-plan.md](docs/stage-1-acceptance-plan.md) | Stage 1 验收计划 |
 | [docs/regression-checklist.md](docs/regression-checklist.md) | 回归清单 |
 | [docs/product-direction.md](docs/product-direction.md) | 产品方向 |
+| [docs/product-principles.zh-CN.md](docs/product-principles.zh-CN.md) | 产品原则与推荐使用模式（中文） |
 
 ## Cursor-first workflow
 
