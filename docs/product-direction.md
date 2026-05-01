@@ -65,6 +65,8 @@ Stage 2 候选（与发布说明对齐）：
 - dashboard / UI  
 - English docs  
 
+**Research (not shipped):** Cursor has announced a **TypeScript SDK (`@cursor/sdk`)** and **Cloud Agents API v1** for programmatic agents (public beta per Cursor docs). A **literature-only** feasibility note for Chief-of-Staff (e.g. a future `dispatch_cursor_worker`) lives in [docs/cursor-sdk-custom-agents-feasibility.zh-CN.md](cursor-sdk-custom-agents-feasibility.zh-CN.md). **No Cursor SDK integration is claimed** until explicitly built and tested.
+
 ## Future Directions
 
 - Marketplace
