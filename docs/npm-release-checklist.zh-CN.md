@@ -6,6 +6,9 @@
 - 在 `chief-mcp-server` 下 `npm run build` 通过
 - `npm pack --dry-run` 结果只包含必要文件（如 `dist`、`README.md`、`package.json`）
 - `package.json` 的 `name` / `version` / `description` / `bin` / `files` 正确
+- 仓库**根目录**存在 `LICENSE`（MIT 全文）
+- `chief-mcp-server/package.json` 的 `license` 字段与 `LICENSE` 一致（均为 MIT）
+- 根目录 `README.md` 含 License 说明（或链到 `LICENSE`）
 - README 中**没有**假装已经发布到 npm
 - 没有提交 `.chief/tasks.json` 等测试污染
 - 文档与仓库中**没有** API Key

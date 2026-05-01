@@ -10,6 +10,12 @@ Chief-of-Staff is an MCP server that helps AI coding projects stay sane by track
 - Cursor MCP supported first
 - Claude Code / Lovable / Bolt / other platforms are not claimed as supported yet
 
+## License and package status
+
+- **License:** MIT (see repository root [LICENSE](../LICENSE)).
+- **Package status:** v0.1 candidate; the package is **not necessarily published** on npm yet.
+- **If installing via `npx`:** confirm the package name exists on the npm registry first; do not assume it is already published.
+
 ## Install in Cursor after npm publish
 
 After this package is published to npm, you can point Cursor at the published binary via `npx` (package name must match `package.json`):
