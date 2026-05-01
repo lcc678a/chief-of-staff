@@ -82,17 +82,30 @@ The chief keeps the **main conversation short** and delegates isolated work to *
 
 ## Cursor project setup
 
-Chief-of-Staff is configured **per project**. New repos do **not** inherit MCP automatically—**each project needs its own** `.cursor/mcp.json`.
+Chief-of-Staff is configured **per project**. New repos do **not** inherit MCP automatically—**each project needs its own** `.cursor/mcp.json` and (for the default workflow) a **Cursor rule** under `.cursor/rules/`.
 
-For every project you want Chief-of-Staff to manage, add `.cursor/mcp.json` **in that project’s root**.
+### Recommended: one-step init (npm)
 
-- **`args`** point to the **Chief-of-Staff MCP server** entrypoint (`npx` package or local `dist/server.js`).
-- **`cwd`** points to the **project being managed** (the repo you opened in Cursor).
-- Open the **target project folder** in Cursor.
-- Start an **Agent chat inside that project window** (not only from Cursor Home / global entry points).
-- **Cursor Home / global Agent** may **not** load project-level MCP servers—if tools are missing, confirm you are in a project-scoped Agent.
+From the **root of the project** you want to manage:
 
-Example (published npm package; placeholder path only):
+```bash
+cd your-project
+npx chief-of-staff-mcp init
+```
+
+This **initializes the current directory** as the managed project. It creates (when missing):
+
+- `.cursor/mcp.json` — **`args`** point at the Chief-of-Staff server (`npx` + package); **`cwd`** is this project’s absolute path (forward slashes on Windows).
+- `.cursor/rules/chief-of-staff.mdc` — project rule with `alwaysApply: true` so **new Agent chats in this repo default to the Chief-of-Staff workflow** (you should not need to repeat “act as the chief” every time).
+- `.chief/` baseline — `tasks.json`, `agent-tasks/`, `results/`, default `config.json` (no API keys).
+
+Run **`init` once per project**. If `mcp.json` already lists other MCP servers, `init` **merges** in `chief-of-staff` without removing them. Existing files are **not** overwritten; re-run is safe.
+
+Then **open this folder in Cursor**, **restart or reload** if MCP settings changed, and start an **Agent chat inside this project**. **Cursor Home / global Agent** may still **not** load project-level MCP—use a project-scoped chat.
+
+You can **skip `init`** and configure `.cursor/mcp.json` by hand; see [`chief-mcp-server/README.md`](chief-mcp-server/README.md) for advanced / local `node` setups.
+
+Example of what `init` writes for MCP (placeholder path only):
 
 ```json
 {
@@ -106,11 +119,9 @@ Example (published npm package; placeholder path only):
 }
 ```
 
-The `npx` example assumes the package is **published** and the name matches `chief-mcp-server/package.json`. For **local development** (clone + `npm run build`), see [`chief-mcp-server/README.md`](chief-mcp-server/README.md).
-
 ## Current status
 
-- **v0.1 release candidate**
+- **v0.1.1** patch: **`npx chief-of-staff-mcp init`** for one-step per-project setup (MCP config + default rule + `.chief/` baseline)
 - **Cursor MCP first**; no claim of support for platforms we have not tested
 - **Project-level MCP** exercised locally in a Cursor project Agent
 - **`chief_doctor`**, **`chief_next_action`**, and **`chief_audit`** verified in that context
@@ -155,7 +166,7 @@ Short list—not a full API reference:
 - **Project-level MCP** must be used in **project context** (open the repo; use a project Agent chat).
 - Config tools **do not print** API key values.
 - **Cursor SDK dispatch** for workers is **not implemented** in this release.
-- **Every new project** needs its own `.cursor/mcp.json` if you want Chief-of-Staff there.
+- **Every new project** needs its own setup: run **`npx chief-of-staff-mcp init`** from that project root (or maintain `.cursor/mcp.json` manually).
 
 ## Why I built this
 

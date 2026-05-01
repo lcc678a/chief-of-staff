@@ -32,7 +32,7 @@ function toJsonSchema(schema: ZodTypeAny): object {
 const server = new Server(
   {
     name: "chief-mcp-server",
-    version: "0.1.0"
+    version: "0.1.1"
   },
   {
     capabilities: {
@@ -177,6 +177,18 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 
 async function main(): Promise<void> {
+  const cliArgs = process.argv.slice(2);
+  const cmd = cliArgs[0];
+  if (cmd === "init") {
+    const { runInit } = await import("./cli/init.js");
+    process.exit(await runInit());
+  }
+  if (cmd === "help" || cmd === "--help" || cmd === "-h") {
+    const { printHelp } = await import("./cli/help.js");
+    printHelp();
+    process.exit(0);
+  }
+
   await ensureDefaultConfigFile();
   const transport = new StdioServerTransport();
   await server.connect(transport);

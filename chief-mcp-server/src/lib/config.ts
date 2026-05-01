@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ChiefConfig } from "../types.js";
-import { CONFIG_FILE } from "./paths.js";
+import { CONFIG_FILE, PROJECT_ROOT } from "./paths.js";
 
 export const DEFAULT_CONFIG: ChiefConfig = {
   default_provider: "dashscope",
@@ -35,15 +35,20 @@ export async function readConfigSafe(): Promise<ChiefConfig | null> {
   }
 }
 
-export async function ensureDefaultConfigFile(): Promise<void> {
+export async function ensureDefaultConfigFileAt(projectRoot: string): Promise<void> {
+  const configFile = path.join(projectRoot, ".chief", "config.json");
   try {
-    await readFile(CONFIG_FILE, "utf-8");
+    await readFile(configFile, "utf-8");
   } catch (error: unknown) {
     if (isErrnoException(error) && error.code === "ENOENT") {
-      await mkdir(path.dirname(CONFIG_FILE), { recursive: true });
-      await writeFile(CONFIG_FILE, JSON.stringify(DEFAULT_CONFIG, null, 2), "utf-8");
+      await mkdir(path.dirname(configFile), { recursive: true });
+      await writeFile(configFile, JSON.stringify(DEFAULT_CONFIG, null, 2), "utf-8");
       return;
     }
     throw error;
   }
+}
+
+export async function ensureDefaultConfigFile(): Promise<void> {
+  return ensureDefaultConfigFileAt(PROJECT_ROOT);
 }

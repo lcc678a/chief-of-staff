@@ -4,10 +4,31 @@
 
 ## 当前状态
 
-- 当前为 **v0.1 candidate**。
+- npm 包当前版本以 `chief-mcp-server/package.json` 为准；**v0.1.1** 起提供 **`npx chief-of-staff-mcp init`** 一键初始化。
 - **优先**支持 **Cursor MCP**；不宣称已支持 Claude Code、Trae、Workbody 等其他平台。
 - **npm 发布前**：可用本地构建后的 `dist/server.js` 路径安装。
-- **npm 发布后**：可用 `npx` + 包名安装（以 `chief-mcp-server/package.json` 的 `name` 为准）。
+- **npm 发布后**：推荐在**每个新项目根目录**运行一次 `init`；亦可手动配置 `npx`（见下文方式 B）。
+
+## 推荐方式（npm）：`init` 一键初始化
+
+在**要被参谋管理的目标项目根目录**执行（将路径换成你的项目）：
+
+```powershell
+cd 你的项目根目录
+npx chief-of-staff-mcp init
+```
+
+`init` 会在当前目录（`process.cwd()`）下按需创建（已存在则**跳过、不覆盖**）：
+
+- `.cursor/mcp.json`（若已有其他 MCP，会**合并**写入 `chief-of-staff`，不删除原有 server）
+- `.cursor/rules/chief-of-staff.mdc`（`alwaysApply: true`，便于项目内**新 Agent Chat 默认按参谋工作流**行动）
+- `.chief/tasks.json`、`.chief/agent-tasks/`、`.chief/results/`、默认 `.chief/config.json`（**不**写入任何 API Key）
+
+说明：
+
+- **每个项目初始化一次**即可；重复执行安全，已存在文件会显示为 skipped。
+- 若**只**把 MCP 配进 Cursor、**没有**项目级 rule，Agent 仍可能表现得像**普通编程助手**，需要反复口头约定「你是参谋」；`init` 主要解决这一问题。
+- 初始化后请在 Cursor 中**打开该项目**，**重启或重载** MCP 如有需要，并在**该项目窗口内**新建 Agent Chat 验证。**Cursor Home / 全局 Agent** 仍可能无法加载项目级 MCP（见下文）。
 
 ## 方式 A：本地开发安装
 

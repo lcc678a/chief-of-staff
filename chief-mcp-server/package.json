@@ -1,6 +1,6 @@
 {
   "name": "chief-of-staff-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Chief-of-Staff MCP server for keeping AI coding projects sane.",
   "type": "module",
   "main": "dist/server.js",

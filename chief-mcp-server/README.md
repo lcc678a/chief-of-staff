@@ -4,15 +4,37 @@ npm package for the **Chief-of-Staff** MCP server: a lightweight coordination la
 
 **Product overview and positioning:** see the repository root [README.md](../README.md).
 
-## What you get
+## Recommended: `init` (per project)
 
-- MCP tools for health checks, repair, audits, task planning, Cursor worker packages, external API workers, and read-only “what next” guidance
-- A workflow built around **one chief conversation** and **short, scoped worker runs**
-- **No** claim that Cursor Home / global Agents load project-level MCP—you configure and use this **inside the target project window**
+Run **from the root of the project** you want Chief-of-Staff to manage (the repo you will open in Cursor):
 
-## Install from npm (when published)
+```bash
+cd your-project
+npx chief-of-staff-mcp init
+```
 
-Confirm the package name exists on the registry (`package.json` → `name`). Then point Cursor at `npx`:
+- **`init` must be run from the project root** (`process.cwd()` becomes the managed project).
+- **Each project** should run **`init` once** (safe to re-run: existing files are skipped, `mcp.json` is merged if needed).
+- Creates `.cursor/mcp.json`, `.cursor/rules/chief-of-staff.mdc` (`alwaysApply: true`), and `.chief/` baseline (`tasks.json`, `agent-tasks/`, `results/`, default `config.json`—no API keys).
+- After `init`, **restart or reload Cursor**, then use an **Agent chat inside that project window**. **Cursor Home / global Agent** may **not** load project-level MCP.
+
+CLI entrypoints:
+
+```text
+chief-of-staff-mcp              # start MCP server (default)
+chief-of-staff-mcp init         # initialize current project
+chief-of-staff-mcp --help       # help
+```
+
+For **local development** of the server itself, use `node dist/server.js` with the same subcommands.
+
+## Advanced / manual MCP setup
+
+If you prefer not to use `init`, add `.cursor/mcp.json` yourself. **`args`** must point at the Chief-of-Staff server entrypoint; **`cwd`** must be the **managed project root**.
+
+### Install from npm (published package)
+
+Confirm the package name exists on the registry (`package.json` → `name`). Example:
 
 ```json
 {
@@ -26,13 +48,11 @@ Confirm the package name exists on the registry (`package.json` → `name`). The
 }
 ```
 
-- **`args`** reference the **Chief-of-Staff server** (here, the published package via `npx`).
-- **`cwd`** must be the **root of the project you are managing** (the repo open in Cursor).
-- MCP is **per project**: copy or create `.cursor/mcp.json` in **each** repo that should use Chief-of-Staff.
+MCP is **per project**: each repo needs its own configuration.
 
 If the package is **not** published yet, use **local development** below—do not rely on `npx` until the name is live on npm.
 
-## Local development
+### Local development
 
 ```bash
 cd chief-mcp-server
@@ -40,7 +60,7 @@ npm install
 npm run build
 ```
 
-Point Cursor at the built server with `node` and an absolute path to `dist/server.js`. Set **`cwd`** to the **managed project root** (often your clone of this repo or another repo you opened in Cursor):
+Point Cursor at the built server with `node` and an absolute path to `dist/server.js`. Set **`cwd`** to the **managed project root**:
 
 ```json
 {
@@ -54,9 +74,15 @@ Point Cursor at the built server with `node` and an absolute path to `dist/serve
 }
 ```
 
-You can start from the repo’s `.cursor/mcp.json.example` at the workspace root (copy to `.cursor/mcp.json` and replace placeholders). **Do not commit** personal absolute paths.
+You can start from the monorepo’s `.cursor/mcp.json.example` (copy to `.cursor/mcp.json` and replace placeholders). **Do not commit** personal absolute paths.
 
 After changing MCP config, **restart Cursor** and open an **Agent chat inside the project** you configured.
+
+## What you get
+
+- MCP tools for health checks, repair, audits, task planning, Cursor worker packages, external API workers, and read-only “what next” guidance
+- A workflow built around **one chief conversation** and **short, scoped worker runs**
+- **No** claim that Cursor Home / global Agents load project-level MCP—you configure and use this **inside the target project window**
 
 ## Cursor behavior
 
@@ -65,7 +91,7 @@ After changing MCP config, **restart Cursor** and open an **Agent chat inside th
 
 ## Status and scope
 
-- **v0.1 release candidate**
+- **v0.1.1** — includes CLI **`init`** for project setup
 - **Cursor MCP** is the primary, tested integration
 - **Cursor SDK**-based automatic worker dispatch is **not** shipped; design/research only (see repo docs)
 - **No** support claims for editors or agents we have not tested

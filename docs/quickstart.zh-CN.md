@@ -4,8 +4,8 @@
 
 ## 安装 MCP（Cursor）
 
-- **试用当前仓库**：在 `chief-mcp-server` 下 `npm install` 与 `npm run build`，再在 Cursor MCP 配置里指向本机的 `dist/server.js`（见 [docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md) 方式 A）。可复制 `.cursor/mcp.json.example` 为 `.cursor/mcp.json` 后改路径。
-- **将来包发布到 npm 后**：可用 `npx -y <package-name>` 安装（以 `chief-mcp-server/package.json` 的 `name` 为准；详见同一文档方式 B）。
+- **已发布 npm 包时（推荐）**：在**目标项目根目录**执行 `npx chief-of-staff-mcp init`（详见 [docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md)「推荐方式」），一次性生成 MCP 配置、默认 Cursor rule 与 `.chief/`。
+- **试用当前仓库 / 本地 server**：在 `chief-mcp-server` 下 `npm install` 与 `npm run build`，可用 `node .../dist/server.js init` 在目标项目初始化，或手动配置 MCP（见安装文档方式 A、`.cursor/mcp.json.example`）。
 - 完整步骤与 FAQ：**[docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md)**。
 - **首次验证 MCP 时**：请在**已打开目标项目**的 Cursor 窗口内，**新建** Agent Chat / Agent Window 再测（详见安装文档「在项目窗口内测试 MCP」）。从 **Cursor Home / 全局 Agent** 测试时若看不到项目级 MCP，**不代表**安装失败。
 - **推荐自测顺序**：`chief_doctor` → `chief_next_action` → `chief_audit`（均由 Agent 在对话中触发调用即可）。
