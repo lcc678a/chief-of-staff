@@ -1,12 +1,30 @@
 {
-  "name": "chief-mcp-server",
+  "name": "chief-of-staff-mcp",
   "version": "0.1.0",
-  "private": true,
+  "description": "Chief-of-Staff MCP server for keeping AI coding projects sane.",
   "type": "module",
+  "main": "dist/server.js",
+  "bin": {
+    "chief-of-staff-mcp": "dist/server.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "package.json"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "node --enable-source-maps --loader ts-node/esm src/server.ts"
   },
+  "keywords": [
+    "mcp",
+    "cursor",
+    "ai-coding",
+    "vibe-coding",
+    "coding-agent",
+    "agent-workflow"
+  ],
+  "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.5",
     "zod": "^3.23.8",

@@ -1,5 +1,11 @@
 # Chief-of-Staff 快速开始
 
+## 安装 MCP（Cursor）
+
+- **试用当前仓库**：在 `chief-mcp-server` 下 `npm install` 与 `npm run build`，再在 Cursor MCP 配置里指向本机的 `dist/server.js`（见 [docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md) 方式 A）。
+- **将来包发布到 npm 后**：可用 `npx -y <package-name>` 安装（以 `chief-mcp-server/package.json` 的 `name` 为准；详见同一文档方式 B）。
+- 完整步骤与 FAQ：**[docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md)**。
+
 ## 1. 打开项目
 
 示例路径：

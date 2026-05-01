@@ -52,6 +52,8 @@ Stage 1 当前定位：
 - **External API route preserved and diagnosable**：`chief_config_help` / `chief_external_preflight` / `dispatch_worker` 形成配置说明、派发前预检（无真实 HTTP）与派发闭环；预检通过不保证 API 真实可用。
 - **Product naming**：对外展示名仍为 Chief-of-Staff；中文展示为 Chief-of-Staff（参谋长）。
 
+**v0.1 packaging：** After Stage 1, the focus shifts to a shippable **Cursor MCP** installable package under `chief-mcp-server` (future `npm publish` / `npx` is planned; not claimed shipped until published). Claude Code / Trae / Workbody adapters are **out of scope** until explicitly built and tested.
+
 Stage 2 候选（与发布说明对齐）：
 
 - automated tests  

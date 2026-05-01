@@ -3,12 +3,16 @@
 **Product name:** Chief-of-Staff  
 **中文名：** Chief-of-Staff（参谋长）  
 **Positioning:** Chief-of-Staff for Cursor  
-**Scope:** Cursor-first but not Cursor-only（以 Cursor 为主战场，同时保留外部 API 工兵路线）。
+**Scope:** Cursor-first but not Cursor-only（以 Cursor 为主战场，同时保留外部 API 工兵路线）。  
+**v0.1：** 优先交付可安装的 **Cursor MCP** 产品包（`chief-mcp-server`）；不宣称已支持 Claude Code / Trae / Workbody。
 
 ## Documentation
 
 | Doc | Description |
 |-----|-------------|
+| [docs/install-cursor.zh-CN.md](docs/install-cursor.zh-CN.md) | 在 Cursor 中安装 |
+| [docs/npm-release-checklist.zh-CN.md](docs/npm-release-checklist.zh-CN.md) | npm 发布检查清单 |
+| [chief-mcp-server/README.md](chief-mcp-server/README.md) | MCP server 包说明（英文） |
 | [docs/quickstart.zh-CN.md](docs/quickstart.zh-CN.md) | 中文快速开始 |
 | [docs/stage-1-release-notes.zh-CN.md](docs/stage-1-release-notes.zh-CN.md) | Stage 1 中文发布说明 |
 | [docs/stage-1-acceptance-plan.md](docs/stage-1-acceptance-plan.md) | Stage 1 验收计划 |
