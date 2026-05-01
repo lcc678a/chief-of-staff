@@ -1,24 +1,22 @@
 # Chief-of-Staff MCP Server
 
-npm package for the **Chief-of-Staff** MCP server: a lightweight coordination layer for Cursor that keeps a local `.chief/` ledger, suggests next actions, audits state, and supports worker handoffs.
+npm package for the **Chief-of-Staff** MCP server: a coordination layer for Cursor—the **Chief** plans and syncs; **workers** implement by default.
 
-**Product overview and positioning:** see the repository root [README.md](../README.md).
+**Product overview:** see the repository root [README.md](../README.md).
 
-## Recommended: `init` (per project)
-
-Run **from the root of the project** you want Chief-of-Staff to manage (the repo you will open in Cursor):
+## Recommended setup
 
 ```bash
 cd your-project
 npx chief-of-staff-mcp init
 ```
 
-- **`init` must be run from the project root** (`process.cwd()` becomes the managed project).
-- **Each project** should run **`init` once** (safe to re-run: existing files are skipped, `mcp.json` is merged if needed).
-- Creates `.cursor/mcp.json`, `.cursor/rules/chief-of-staff.mdc` (`alwaysApply: true`), and `.chief/` baseline (`tasks.json`, `agent-tasks/`, `results/`, default `config.json`—no API keys).
-- After `init`, **restart or reload Cursor**, then use an **Agent chat inside that project window**. **Cursor Home / global Agent** may **not** load project-level MCP.
+- Run **`init` once per project** from that project’s **root** (`process.cwd()` is the managed project).
+- It creates **`.cursor/mcp.json`**, **`.cursor/rules/chief-of-staff.mdc`**, and **`.chief/`** (when missing; existing files are not overwritten).
+- **Reload or restart Cursor**, then confirm **`chief-of-staff` is enabled** in Cursor MCP settings. Some Cursor versions require **manually enabling** a newly added MCP server; if tools do not appear, open MCP settings and turn it on.
+- **Open** the project in Cursor, then start an **Agent chat inside that project window**. **Cursor Home / global Agent** may **not** load project-level MCP.
 
-CLI entrypoints:
+CLI:
 
 ```text
 chief-of-staff-mcp              # start MCP server (default)
@@ -26,15 +24,56 @@ chief-of-staff-mcp init         # initialize current project
 chief-of-staff-mcp --help       # help
 ```
 
-For **local development** of the server itself, use `node dist/server.js` with the same subcommands.
+For local development of this repo, use `node dist/server.js` with the same subcommands.
+
+## What the rule does
+
+The generated **`.cursor/rules/chief-of-staff.mdc`** (`alwaysApply: true`) makes **new project Agent chats** follow the Chief-of-Staff workflow:
+
+- In a new project conversation, the Chief first explains the working mode and worker routes before proposing product plans.
+- The **Chief plans and coordinates**—clarifies vague product goals before coding, tracks state, suggests next steps.
+- **Implementation normally** goes through **Cursor Agent Worker** or **External API Worker**.
+- The Chief should explain the practical effect of both routes and ask which route the user wants when implementation is ready.
+- The user can switch route/direction later; the Chief should update plans before preparing or dispatching work.
+- Short acknowledgements such as **"ok" / "yes" / "好" / "继续"** are continuation signals, not approval to edit files, register tasks, prepare packages, or dispatch workers.
+- The Chief **should not** directly create or edit application code **by default**; only small direct edits when the **user explicitly** asks, after stating which files will change.
+
+**Installing MCP without this rule** leaves Cursor behaving like a **normal assistant**; use **`init`** (or copy the rule yourself) to get Chief behavior.
+
+## Model strategy: stronger Chief, flexible Workers
+
+This package **does not automatically select Cursor models** for you.
+
+A **common pattern** is to use a **stronger reasoning model** in the **main Chief** chat (direction, memory, decisions, decomposition, handoff, review) and **other models** for workers—e.g. **faster / cheaper** or **specialized** models for implementation.
+
+- **Cursor Agent Worker:** the user chooses the model in the **separate Cursor Agent worker** window.
+- **External API Worker:** the user configures **provider / model / API** in Chief-of-Staff external worker settings.
+
+Chief-of-Staff **organizes the workflow**; it does **not** pretend to control every model choice inside Cursor.
+
+## Worker routes
+
+### Cursor Agent Worker
+
+- The Chief prepares a **task package** (`prepare_cursor_agent_task`).
+- You open a **separate Cursor Agent window**.
+- You **paste** the task package into that worker.
+- The worker implements; you or the Chief records the outcome (`submit_worker_result`).
+
+### External API Worker
+
+- You configure **your own** provider / model / API (environment variables; see `chief_config_help`).
+- The Chief runs **`chief_external_preflight`** before dispatch.
+- The Chief calls **`dispatch_worker`** only when configuration and route fit.
+- **No API key values** are printed by tools.
 
 ## Advanced / manual MCP setup
 
-If you prefer not to use `init`, add `.cursor/mcp.json` yourself. **`args`** must point at the Chief-of-Staff server entrypoint; **`cwd`** must be the **managed project root**.
+You may edit **`.cursor/mcp.json`** by hand. You should still add **`.cursor/rules/chief-of-staff.mdc`** (or equivalent), or the Agent may **not** follow Chief/worker boundaries—**MCP alone is not enough**.
 
 ### Install from npm (published package)
 
-Confirm the package name exists on the registry (`package.json` → `name`). Example:
+Confirm the package exists on the registry. Example:
 
 ```json
 {
@@ -48,10 +87,6 @@ Confirm the package name exists on the registry (`package.json` → `name`). Exa
 }
 ```
 
-MCP is **per project**: each repo needs its own configuration.
-
-If the package is **not** published yet, use **local development** below—do not rely on `npx` until the name is live on npm.
-
 ### Local development
 
 ```bash
@@ -59,8 +94,6 @@ cd chief-mcp-server
 npm install
 npm run build
 ```
-
-Point Cursor at the built server with `node` and an absolute path to `dist/server.js`. Set **`cwd`** to the **managed project root**:
 
 ```json
 {
@@ -74,27 +107,25 @@ Point Cursor at the built server with `node` and an absolute path to `dist/serve
 }
 ```
 
-You can start from the monorepo’s `.cursor/mcp.json.example` (copy to `.cursor/mcp.json` and replace placeholders). **Do not commit** personal absolute paths.
-
-After changing MCP config, **restart Cursor** and open an **Agent chat inside the project** you configured.
+After MCP changes, **restart Cursor** and use a **project-scoped** Agent chat.
 
 ## What you get
 
-- MCP tools for health checks, repair, audits, task planning, Cursor worker packages, external API workers, and read-only “what next” guidance
-- A workflow built around **one chief conversation** and **short, scoped worker runs**
-- **No** claim that Cursor Home / global Agents load project-level MCP—you configure and use this **inside the target project window**
+- MCP tools for health, repair, audits, task planning, Cursor worker packages, external workers, and read-only next-step guidance
+- A workflow built around **one Chief conversation** and **worker-side implementation**
+- **No** claim that Cursor Home / global Agents load project-level MCP
 
 ## Cursor behavior
 
-- Open the **target folder** in Cursor and use an **Agent** scoped to that workspace.
-- Agents started from **Cursor Home / global** context **may not** expose project-level MCP tools—this is a Cursor behavior, not necessarily a failed install.
+- Open the **target folder** in Cursor; use an **Agent** scoped to that workspace.
+- **Home / global** Agents **may not** expose project MCP—this is Cursor behavior, not necessarily a failed install.
 
 ## Status and scope
 
-- **v0.1.1** — includes CLI **`init`** for project setup
-- **Cursor MCP** is the primary, tested integration
-- **Cursor SDK**-based automatic worker dispatch is **not** shipped; design/research only (see repo docs)
-- **No** support claims for editors or agents we have not tested
+- **v0.1.1** — CLI **`init`** plus default **Chief/worker** Cursor rule
+- **Cursor MCP** is the primary integration
+- **Cursor SDK** auto-dispatch is **not** shipped; design/research only
+- **No** untested-platform support claims
 
 ## Core tools (short)
 

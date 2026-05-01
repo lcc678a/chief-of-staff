@@ -5,10 +5,28 @@
 ## 安装 MCP（Cursor）
 
 - **已发布 npm 包时（推荐）**：在**目标项目根目录**执行 `npx chief-of-staff-mcp init`（详见 [docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md)「推荐方式」），一次性生成 MCP 配置、默认 Cursor rule 与 `.chief/`。
-- **试用当前仓库 / 本地 server**：在 `chief-mcp-server` 下 `npm install` 与 `npm run build`，可用 `node .../dist/server.js init` 在目标项目初始化，或手动配置 MCP（见安装文档方式 A、`.cursor/mcp.json.example`）。
+- **试用当前仓库 / 本地 server**：在 `chief-mcp-server` 下 `npm install` 与 `npm run build`，可用 `node .../dist/server.js init` 在目标项目初始化，或手动配置 MCP（见安装文档方式 A、`.cursor/mcp.json.example`）。**仅配 MCP 不配 rule 时，Agent 仍可能像普通编程助手。**
 - 完整步骤与 FAQ：**[docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md)**。
-- **首次验证 MCP 时**：请在**已打开目标项目**的 Cursor 窗口内，**新建** Agent Chat / Agent Window 再测（详见安装文档「在项目窗口内测试 MCP」）。从 **Cursor Home / 全局 Agent** 测试时若看不到项目级 MCP，**不代表**安装失败。
+- **首次验证 MCP 时**：`init` 后请 **Reload / Restart Cursor**，并在 Cursor **MCP 设置**里确认 **`chief-of-staff` 已启用**（部分版本新加的 MCP 可能默认关闭）。然后在**已打开目标项目**的 Cursor 窗口内，**新建** Agent Chat / Agent Window 再测（详见安装文档「在项目窗口内测试 MCP」）。若 Agent Chat 里看不到 `chief_doctor` / `chief_next_action` 等工具，**先检查 MCP 是否已启用**。从 **Cursor Home / 全局 Agent** 测试时若看不到项目级 MCP，**不代表**安装失败。
 - **推荐自测顺序**：`chief_doctor` → `chief_next_action` → `chief_audit`（均由 Agent 在对话中触发调用即可）。
+- **模型策略（常见用法）**：建议在**主 Chief 对话**里选用**更强的推理模型**；若使用 **Cursor Agent Worker**，可在**工兵窗口**选择适合执行的模型；若使用 **External API Worker**，则通过 **provider/model/API** 配置选择外部模型。Chief-of-Staff **不**替你自动切换 Cursor 模型。
+
+## 从零开始的推荐流程
+
+1. `cd` 进入你的项目根目录。
+2. 运行 `npx chief-of-staff-mcp init`。
+3. 用 Cursor **打开该项目**；**Reload / Restart Cursor**；在 **MCP 设置**里确认 **`chief-of-staff` 已启用**（若显示为关闭请手动打开）。
+4. 在**该项目窗口内**新开 **Agent Chat**。
+5. Chief 应在对话开头按顺序**简短说明**：主参谋角色 → 保持状态清晰与下一步建议 → 默认不直接写应用代码 → 两条工兵路线（Cursor / External）→ 你后续可随时切换路线或方向；不必每轮重复。
+6. 你提出目标（例如产品想法）。
+7. 对**模糊目标**，Chief **先问关键选择**（平台、数据、登录、MVP、工兵路线等），**不**直接大段写代码；并中性说明两条路线的执行差异，再请你选择。
+8. 方向一致后，Chief 用 `plan_tasks` 等**登记任务**，并用 `prepare_cursor_agent_task` 准备 **Cursor 工兵任务包**，或在你配置好 API 后走 **External** 预检与派发。
+9. 你选择 **Cursor Agent Worker**（新开 Agent 窗口粘贴任务包）或 **External API Worker**；简单实现通常**一个**工兵任务即可。
+
+**反例（不符合产品设定）**：你说「我想做学习软件」，Agent **立刻**搭栈、改很多文件。  
+**正例**：Chief **先问**目标用户、平台（小程序/Web/桌面等）、数据与登录、MVP 范围、更倾向哪种工兵路线，再总结待确认方向并准备任务/任务包。
+
+补充：短回复如「好 / 可以 / 继续 / 嗯」只表示继续对话，**不自动等于**批准写代码、登记任务、准备任务包或派发工兵；进入实施前应有明确确认。
 
 ## 选择使用模式
 

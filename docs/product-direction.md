@@ -28,7 +28,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 ## Current Mainline
 
 - Cursor-first MVP.
-- One-shot project repair via MCP `chief_repair`: create missing `.chief` layout and empty `tasks.json` without overwriting user data; rules file is never auto-generated.
+- One-shot project setup via CLI **`npx chief-of-staff-mcp init`**: creates `.cursor/mcp.json` (merge-safe), **`.cursor/rules/chief-of-staff.mdc`** (default Chief/worker workflow, `alwaysApply`), and `.chief/` baseline without overwriting existing user files. **`chief_repair`** still repairs `.chief/` layout only; it does not overwrite an existing rules file (use `init` or restore the rule from the repo when missing).
 - External API onboarding via MCP `chief_config_help`: read-only diagnosis of provider config and env-var presence (no key values, no HTTP); complements docs for DashScope / OpenAI-compatible / other providers.
 - Before external dispatch, MCP `chief_external_preflight` validates readiness (task/config/deps, same provider/model rules as `dispatch_worker`) without writes or API calls; distinct from `chief_config_help` (config explanation vs dispatch safety).
 - `dispatch_worker` mirrors those readiness rules before spawning an external worker: unfinished `depends_on`, missing env key, missing provider/model/config, or `cursor_agent` tasks without explicit provider/model → no dispatch; messages reference `chief_external_preflight` / `chief_config_help`.
@@ -45,7 +45,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 Stage 1 当前定位：
 
 - **Chief-of-Staff for Cursor**：规划与编排层，不替代 Cursor 本体。
-- **Cursor-first but not Cursor-only**：默认优先 Cursor 工兵，外部 API 工兵路线保留且可诊断。
+- **Cursor-first but not Cursor-only**：保留 Cursor 工兵与外部 API 工兵两条路线，由用户按执行方式与配置条件选择。
 - **Safety-first task orchestration**：依赖门、文件范围、明确 outcome（done / blocked / failed）。
 - **Read-only diagnostics before action**：`chief_doctor`、`chief_audit`、`chief_external_preflight`、`chief_config_help`、`chief_next_action` 等以只读诊断与建议为主。
 - **Explicit user handoff for Cursor Agents**：任务包复制粘贴到 Agents；窗口命名由用户手动 Rename，不宣称自动打开子窗口或自动 Rename。
@@ -77,6 +77,9 @@ Stage 2 候选（与发布说明对齐）：
 ## Product principles
 
 - **Keep the main AI and the user synchronized:** the user should always know what is in flight, what is next, and which task lives in which worker / Agent surface; the chief compresses state into a clear next step.
+- **Chief is coordination, not the default app author:** the Chief clarifies vague product intent before implementation, preserves project memory, and **by default** routes implementation through **Cursor Agent Worker** (separate Agent window + task package) or **External API Worker** (user-configured provider/model). The Chief does **not** silently turn the main chat into a bulk code-writing session; small direct edits only when the user explicitly asks.
+- **Onboarding order and confirmation semantics matter:** in a new conversation, the Chief should explain role + worker routes first, then ask key decisions, then suggest plans. Short acknowledgements ("ok", "继续", etc.) mean continue talking, not implicit approval to edit files, register tasks, prepare packages, or dispatch workers.
+- **Model strategy (common pattern, not a mandate):** users may pair a **stronger reasoning model** in the **Chief** chat with **different** worker models (faster/cheaper/specialized) for implementation. **Cursor** model pickers remain **user-controlled** in each Agent surface; **External API Worker** models come from user **provider/model** configuration. Chief-of-Staff **does not claim** to force or auto-switch Cursor models.
 - **One visible chief agent; tools stay behind the workflow:** doctor / audit / next_action / prepare / dispatch are implementation details—the experience is “I ask the chief; the chief tells me what to do next,” not “I manage a pile of tool names.”
 - **Short main context; workers for isolated tasks:** split work into tasks, push execution that does not need the user’s ongoing presence to workers, and bring back concise summaries; the chief stays grounded via `.chief/` state and summaries, not endless chat history.
 - **Two recommended modes:** single-chief mode for beginners and small efforts; chief + workers when the project grows and parallelization or context savings matter (see [docs/product-principles.zh-CN.md](product-principles.zh-CN.md)).

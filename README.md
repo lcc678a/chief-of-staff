@@ -2,19 +2,19 @@
 
 **Keep your AI coding project sane.**
 
-Chief-of-Staff is a lightweight MCP server for Cursor that acts as a project chief of staff for AI coding work. It keeps the user and the main AI synchronized, tracks tasks, suggests the next action, audits project state, and helps delegate isolated work to worker agents.
+Chief-of-Staff is a lightweight MCP server for Cursor that acts as a **chief of staff** for AI coding work—not a generic code generator. It keeps **you and one Chief agent** aligned: the Chief **plans, syncs, breaks work down, hands off implementation, collects results, and audits** project state. The Chief **does not** treat the main chat as the default place to write your application.
 
 The goal is not to make you manage more AI tools.  
-The goal is to let you stay in flow with **one clear chief agent**.
+The goal is to let you stay in flow with **one clear chief agent** that coordinates **Cursor Agent Workers** and **External API Workers** instead of silently becoming a solo programmer in your primary conversation.
 
 **中文名：** Chief-of-Staff（参谋长）
 
 ## What it is
 
 - A **lightweight MCP server for Cursor**
-- A **project coordination layer** on top of your repo
+- A **coordination layer**: the **Chief** owns direction, decisions, task ledger, next steps, handoffs, and consistency checks
 - A **local `.chief/` project ledger** (tasks, worker state, handoffs)
-- A workflow where the **main AI stays clear** while **workers** handle isolated tasks
+- **Implementation by default** flows through **workers**, not through the Chief typing large code changes into the main chat
 
 ## Why
 
@@ -31,14 +31,20 @@ Chief-of-Staff keeps a **small project ledger** so the main agent can stay **cle
 
 ## Product idea
 
-You interact with **one visible chief**:
+You interact with **one visible Chief** in the main Agent chat:
 
-- You talk to the chief.
-- The chief checks project state.
-- The chief suggests the next action.
-- The chief prepares worker tasks when needed.
-- Workers return summaries.
-- You stay focused on product direction instead of managing scattered AI conversations.
+- The Chief **clarifies** vague goals (platform, MVP, data, auth, milestones, worker route) **before** implementation.
+- The Chief checks project state and suggests **one clear next action**.
+- The Chief **tracks** agreed work in `.chief/` when useful.
+- In a **new chat**, the Chief should first explain this working mode (Chief role, worker routes, non-default direct coding) before proposing concrete product plans.
+- **By default, the Chief does not create or edit application code** in that chat. **Implementation** goes to:
+  - **Cursor Agent Worker** — the Chief prepares a **copyable task package**; you open a **separate Cursor Agent window** and paste it to the worker; the worker executes; you or the Chief records results.
+  - **External API Worker** — you configure **your own** provider / model / API keys (env vars); the Chief uses **preflight** then **dispatch** when the route is appropriate.
+- The Chief explains both routes neutrally and asks which route you want when implementation is ready.
+- The route is **not final**: you can switch worker route or product direction later, and the Chief should update the plan before preparing/dispatching work.
+- Short acknowledgements like **"ok" / "continue" / "好"** are **not approval** to edit files, register tasks, or dispatch workers.
+- **Simple work** can be **one** worker task; **complex work** splits into multiple tasks with scopes and dependencies—not unnecessary multi-agent sprawl.
+- The Chief may **only** apply a **small direct edit** in the main chat when **you explicitly ask** for that.
 
 The tools exist to support that flow—they are not the product by themselves.
 
@@ -51,18 +57,31 @@ Chief-of-Staff is for:
 - **Professional developers** experimenting with Cursor agents and MCP workflows
 - **Teams** that want a lightweight task ledger before introducing heavier project management
 
+## Model strategy: stronger Chief, flexible Workers
+
+A **common pattern** (not a requirement) is to use a **stronger reasoning model** for the **main Chief** conversation, because the Chief carries **product direction**, **project memory**, **decisions**, **task decomposition**, **worker handoffs**, and **review**.
+
+**Workers** can run on **different** models suited to the job—for example a **faster, cheaper** model for straightforward implementation, or a **specialized worker** profile for code-heavy or text-heavy tasks.
+
+How you set that up:
+
+- **Chief (Cursor):** pick the model you want in the **main Chief Agent chat**—Chief-of-Staff does **not** force or auto-switch Cursor models for you.
+- **Cursor Agent Worker:** pick the model in the **separate Cursor Agent worker** window where the task package runs.
+- **External API Worker:** pick **provider / model / API** in your Chief-of-Staff **external worker** configuration.
+
+That separation lets you put **higher-quality thinking and coordination** in the Chief chat while **routing execution** through workers that fit cost, latency, or specialization—without claiming Chief-of-Staff controls every model picker in Cursor.
+
 ## Two recommended modes
 
 ### Chief-only mode
 
-Best for:
+Best when you want **one main Agent chat** for direction and coordination (still **not** “the Chief writes all the code here”):
 
-- New users
+- New users learning the workflow
 - Small projects
 - Focused work
-- Anyone who wants to stay with **one** main AI
 
-Useful prompts:
+The Chief still **defaults to worker routes** for implementation. Useful prompts:
 
 - What is the current state?
 - What should I do next?
@@ -76,9 +95,9 @@ Best for:
 - Repeated or isolated tasks
 - Documentation cleanup
 - Local code changes with a clear file scope
-- Tasks that do not require the user’s full context
+- Tasks that do not require the user’s full context in the Chief chat
 
-The chief keeps the **main conversation short** and delegates isolated work to **Cursor worker agents**. Workers report back with **summaries**, which saves tokens and reduces confusion.
+The Chief keeps the **main conversation short**; **Cursor Agent Workers** or **External API Workers** carry implementation. Workers report back with **summaries**, which saves tokens and reduces confusion.
 
 ## Cursor project setup
 
@@ -96,12 +115,12 @@ npx chief-of-staff-mcp init
 This **initializes the current directory** as the managed project. It creates (when missing):
 
 - `.cursor/mcp.json` — **`args`** point at the Chief-of-Staff server (`npx` + package); **`cwd`** is this project’s absolute path (forward slashes on Windows).
-- `.cursor/rules/chief-of-staff.mdc` — project rule with `alwaysApply: true` so **new Agent chats in this repo default to the Chief-of-Staff workflow** (you should not need to repeat “act as the chief” every time).
+- `.cursor/rules/chief-of-staff.mdc` — project rule with `alwaysApply: true` so **new Agent chats default to Chief behavior** (coordination, checkpoints, worker handoffs—not a generic coding agent). **MCP alone does not create this rule**; without it, Cursor may still behave like a normal programming assistant.
 - `.chief/` baseline — `tasks.json`, `agent-tasks/`, `results/`, default `config.json` (no API keys).
 
 Run **`init` once per project**. If `mcp.json` already lists other MCP servers, `init` **merges** in `chief-of-staff` without removing them. Existing files are **not** overwritten; re-run is safe.
 
-Then **open this folder in Cursor**, **restart or reload** if MCP settings changed, and start an **Agent chat inside this project**. **Cursor Home / global Agent** may still **not** load project-level MCP—use a project-scoped chat.
+After running `init`, **open this folder in Cursor**, **reload or restart Cursor**, and make sure the **`chief-of-staff` MCP server is enabled** in Cursor settings. Some Cursor versions add a new MCP server in a **disabled** state; if Chief-of-Staff tools do not appear in Agent chat, check MCP settings and enable the server manually—this is normal Cursor behavior, not a failed install. Then start an **Agent chat inside this project**. **Cursor Home / global Agent** may still **not** load project-level MCP—use a project-scoped chat.
 
 You can **skip `init`** and configure `.cursor/mcp.json` by hand; see [`chief-mcp-server/README.md`](chief-mcp-server/README.md) for advanced / local `node` setups.
 
@@ -118,6 +137,13 @@ Example of what `init` writes for MCP (placeholder path only):
   }
 }
 ```
+
+### Troubleshooting: Chief tools do not appear
+
+- Make sure you opened the **target project folder** in Cursor.
+- **Reload / restart** Cursor after `init` or MCP config changes.
+- Check **Cursor MCP settings** and **enable** `chief-of-staff` if it is disabled.
+- Use an **Agent chat inside the project window**, not Cursor Home / global Agent.
 
 ## Current status
 

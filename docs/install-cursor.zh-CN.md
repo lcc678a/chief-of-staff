@@ -2,6 +2,8 @@
 
 英文产品介绍与 Cursor 配置要点见仓库根目录 [README.md](../README.md)。
 
+**推荐方式不是「只安装 MCP」**，而是**初始化整个 Chief-of-Staff 项目工作区**（MCP + 默认 Cursor rule + `.chief/`）。否则 Agent 很容易仍表现为**普通编程助手**。
+
 ## 当前状态
 
 - npm 包当前版本以 `chief-mcp-server/package.json` 为准；**v0.1.1** 起提供 **`npx chief-of-staff-mcp init`** 一键初始化。
@@ -14,21 +16,56 @@
 在**要被参谋管理的目标项目根目录**执行（将路径换成你的项目）：
 
 ```powershell
-cd 你的项目根目录
+cd 你的项目
 npx chief-of-staff-mcp init
 ```
 
 `init` 会在当前目录（`process.cwd()`）下按需创建（已存在则**跳过、不覆盖**）：
 
-- `.cursor/mcp.json`（若已有其他 MCP，会**合并**写入 `chief-of-staff`，不删除原有 server）
-- `.cursor/rules/chief-of-staff.mdc`（`alwaysApply: true`，便于项目内**新 Agent Chat 默认按参谋工作流**行动）
-- `.chief/tasks.json`、`.chief/agent-tasks/`、`.chief/results/`、默认 `.chief/config.json`（**不**写入任何 API Key）
+```text
+.cursor/mcp.json
+.cursor/rules/chief-of-staff.mdc
+.chief/
+```
 
-说明：
+具体包括：`.cursor/mcp.json`（可与其他 MCP **合并**）、`.cursor/rules/chief-of-staff.mdc`（`alwaysApply: true`）、`.chief/tasks.json`、`.chief/agent-tasks/`、`.chief/results/`、默认 `.chief/config.json`（**不**写入任何 API Key）。
 
+必须强调：
+
+```text
+只装 MCP 不等于进入参谋模式。
+参谋模式依赖 .cursor/rules/chief-of-staff.mdc。
+```
+
+- **主参谋（Chief）默认不直接写应用代码**；默认通过两条**工兵**路线落地实现：
+  1. **Cursor Agent Worker**：参谋用 `prepare_cursor_agent_task` 准备任务包；你在 Cursor 里**新开 Agent 窗口**，把任务包交给工兵执行。
+  2. **External API Worker**：你在环境变量等配置**自己的模型 API** 后，参谋通过 `chief_external_preflight` / `dispatch_worker` 派发（工具**不显示**密钥值）。
+- 新 Agent Chat 的期望开场顺序：先说明参谋工作方式（主参谋角色、默认不直接写代码、两条工兵路线、后续可切换路线）→ 再问当前目标的关键选择 → 再给建议。
+- 路线选择应中性说明差异：  
+  - **Cursor Agent Worker**：参谋准备任务包，你在单独 Cursor Agent 窗口执行本地实现；完成后把工兵摘要带回主参谋。  
+  - **External API Worker**：你已配置 provider/model/API 时，参谋可先 preflight 再 dispatch，经 Chief-of-Staff 流程返回结果。  
+  请由用户明确选择路线；不要默认替用户拍板。
+- **“好 / 可以 / 继续 / 嗯”不等于批准执行**：这些短确认仅表示继续对话，不自动等于允许登记任务、准备任务包、派发工兵或改文件。进入实施前应先总结方向并取得明确确认。
 - **每个项目初始化一次**即可；重复执行安全，已存在文件会显示为 skipped。
-- 若**只**把 MCP 配进 Cursor、**没有**项目级 rule，Agent 仍可能表现得像**普通编程助手**，需要反复口头约定「你是参谋」；`init` 主要解决这一问题。
 - 初始化后请在 Cursor 中**打开该项目**，**重启或重载** MCP 如有需要，并在**该项目窗口内**新建 Agent Chat 验证。**Cursor Home / 全局 Agent** 仍可能无法加载项目级 MCP（见下文）。
+
+运行 `init` 后，请**重启 / Reload Cursor**，并在 Cursor 的 **MCP 设置**里确认 **`chief-of-staff` 已启用**。部分 Cursor 版本会把新添加的 MCP server **默认置为未启用**，需要用户**手动打开**后，Agent Chat 才能看到 Chief-of-Staff 工具。这是 Cursor 的**正常权限/安全行为**，**不代表** Chief-of-Staff 安装失败。
+
+### 如果 MCP 第一次是关闭的
+
+这是正常情况。请在 Cursor **MCP 设置**里手动**启用** `chief-of-staff`，然后 **Reload / Restart Cursor**。
+
+## 模型使用建议：强模型做参谋，其他模型做工兵
+
+Chief-of-Staff 的**常见用法**（非硬性规定）是：
+
+- **主参谋 Chief** 使用**更强的推理模型**，负责方向、记忆、决策、拆解、派工和验收。
+- **Cursor Agent Worker** 可以在**单独的 Cursor Agent 窗口**里选择**适合执行**的模型（例如更快、更便宜或更偏代码实现的模型）。
+- **External API Worker** 可以通过 **provider/model/API** 配置选择**外部工兵**模型。
+
+这样可以把**高质量思考与协调**留给主参谋，把**具体执行**交给更快、更便宜或更专门的工兵模型。
+
+**注意：** Chief-of-Staff **不会**强制替你切换 Cursor 里的模型。Cursor 侧模型仍由你在 **Cursor 界面**中选择；本产品负责组织工作流，不伪装成能自动控制所有模型选择。
 
 ## 方式 A：本地开发安装
 
