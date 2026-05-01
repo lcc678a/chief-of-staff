@@ -13,22 +13,23 @@
 2. 进入 `chief-mcp-server` 目录。
 3. 运行 `npm install`。
 4. 运行 `npm run build`。
-5. 在 Cursor 的 MCP 配置中加入 `node` + 本机上的 `dist/server.js` 绝对路径。
+5. 在 Cursor 的 MCP 配置中加入 `node` + 本机上的 `dist/server.js` 绝对路径。推荐：复制仓库根目录下的 `.cursor/mcp.json.example` 为 `.cursor/mcp.json`，再把其中的占位路径全部替换为你本机的真实路径（**不要**把含个人绝对路径的 `mcp.json` 提交到团队仓库）。
 
-示例（请把路径换成你的实际路径）：
+示例（请把路径换成你的实际路径；`cwd` 必须指向本仓库**根目录**，`args` 必须指向 `chief-mcp-server/dist/server.js`）：
 
 ```json
 {
   "mcpServers": {
     "chief-of-staff": {
       "command": "node",
-      "args": ["C:/Users/<you>/path/to/chief-of-staff/chief-mcp-server/dist/server.js"]
+      "args": ["C:/Users/<you>/path/to/chief-of-staff/chief-mcp-server/dist/server.js"],
+      "cwd": "C:/Users/<you>/path/to/chief-of-staff"
     }
   }
 }
 ```
 
-Windows 上请使用你的真实盘符与目录；反斜杠可写成 `/` 或按 Cursor 要求转义。
+Windows 上请使用你的真实盘符与目录；反斜杠可写成 `/` 或按 Cursor 要求转义。macOS / Linux 用户请将上述路径改为本机风格（例如 `/home/<you>/path/to/chief-of-staff/...`），规则相同：`cwd` 为仓库根，`args` 指向该仓库内 `chief-mcp-server/dist/server.js`。
 
 ## 方式 B：npm 发布后安装
 
@@ -48,6 +49,22 @@ Windows 上请使用你的真实盘符与目录；反斜杠可写成 `/` 或按 
 ```
 
 **注意**：本文档不表示包已在 npm 上发布；发布前请参见 [docs/npm-release-checklist.zh-CN.md](./npm-release-checklist.zh-CN.md)。
+
+## 重要：在项目窗口内测试 MCP
+
+- **项目级** `.cursor/mcp.json` 只在**打开该项目文件夹之后**才会被 Cursor 可靠加载并与该项目绑定。
+- 请先**用 Cursor 打开目标项目**（打开本仓库根目录或你的 Chief-of-Staff 工作副本）。
+- 在**该项目窗口内**新建 **Agent Chat / Agent Window** 再测试 MCP 工具。
+- **不要**从 **Cursor Home / 全局 Agent** 界面新建对话来测试**项目级** MCP：该环境可能没有当前项目上下文，工具列表里可能**看不到**本项目的 MCP；这**不代表** MCP 未安装成功。
+- 若看不到 Chief-of-Staff 工具，请先确认：当前 Agent 是否属于**已打开目标项目**的那一个窗口。
+
+### 使用 `mcp.json.example`（本地路径）
+
+1. 复制 `.cursor/mcp.json.example` 为 `.cursor/mcp.json`。
+2. 将 JSON 中的占位路径改为你**自己机器上**的绝对路径；**勿**将含个人隐私路径的 `mcp.json` 提交到远程仓库。
+3. **`cwd`** 必须指向 **Chief-of-Staff 项目根目录**（与 `package.json` / `.chief` 所在层级一致）。
+4. **`args`** 中的脚本路径必须指向 **`chief-mcp-server/dist/server.js`**（须先在该目录执行 `npm run build`）。
+5. 修改 MCP 配置后**重启 Cursor**，再在**项目窗口内**的 Agent 中验证工具是否出现。
 
 ## 安装后测试
 
