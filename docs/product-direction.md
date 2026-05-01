@@ -67,6 +67,13 @@ Stage 2 候选（与发布说明对齐）：
 
 **Research (not shipped):** Cursor has announced a **TypeScript SDK (`@cursor/sdk`)** and **Cloud Agents API v1** for programmatic agents (public beta per Cursor docs). A **literature-only** feasibility note for Chief-of-Staff (e.g. a future `dispatch_cursor_worker`) lives in [docs/cursor-sdk-custom-agents-feasibility.zh-CN.md](cursor-sdk-custom-agents-feasibility.zh-CN.md). **No Cursor SDK integration is claimed** until explicitly built and tested.
 
+## Cursor SDK route
+
+- **Cursor SDK Custom Agents** 已调研；公开资料表明其处于 **public beta**，需要 **`CURSOR_API_KEY`**，且可能产生 **Cursor 用量费用**。
+- **未来**可能通过 **`dispatch_cursor_worker`**（及配套 preflight / run 管理工具）实现自动派发 Cursor 工兵；详细设计见 [docs/cursor-sdk-dispatch-worker-design.zh-CN.md](cursor-sdk-dispatch-worker-design.zh-CN.md)。
+- **当前尚未集成**：仓库与 MCP 主流程**不包含** `@cursor/sdk` 依赖，也**未实现**上述工具。
+- **手动 Cursor worker 路线**（`prepare_cursor_agent_task` + 用户复制到 Agents + `submit_worker_result`）仍是 **Stage 1 及近期的稳定路径**与 **fallback**。
+
 ## Future Directions
 
 - Marketplace

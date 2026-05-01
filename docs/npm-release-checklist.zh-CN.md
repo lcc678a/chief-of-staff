@@ -10,6 +10,8 @@
 - `chief-mcp-server/package.json` 的 `license` 字段与 `LICENSE` 一致（均为 MIT）
 - 根目录 `README.md` 含 License 说明（或链到 `LICENSE`）
 - README 中**没有**假装已经发布到 npm
+- README 与产品文档**不得声称** Cursor SDK 自动派发路线（如 `dispatch_cursor_worker`）**已实现**或已作为默认能力发布
+- 若未来在包内加入 `@cursor/sdk` 等依赖：需单独评审 **package dependency**、**API Key（`CURSOR_API_KEY`）**、**费用与 beta 风险**说明是否对用户充分可见
 - 没有提交 `.chief/tasks.json` 等测试污染
 - 文档与仓库中**没有** API Key
 - Cursor 本地 MCP 配置能启动该 server
