@@ -6,7 +6,7 @@
 
 ## 当前状态
 
-- npm 包当前版本以 `chief-mcp-server/package.json` 为准；**v0.1.1** 起提供 **`npx chief-of-staff-mcp init`** 一键初始化。
+- npm 包当前版本以 `chief-mcp-server/package.json` 为准；**v0.1.2** 起文档与发布对齐；**`npx chief-of-staff-mcp init`** 提供一键初始化（自 **v0.1.1** 引入）。
 - **优先**支持 **Cursor MCP**；不宣称已支持 Claude Code、Trae、Workbody 等其他平台。
 - **npm 发布前**：可用本地构建后的 `dist/server.js` 路径安装。
 - **npm 发布后**：推荐在**每个新项目根目录**运行一次 `init`；亦可手动配置 `npx`（见下文方式 B）。
@@ -38,7 +38,7 @@ npx chief-of-staff-mcp init
 ```
 
 - **主参谋（Chief）默认不直接写应用代码**；默认通过两条**工兵**路线落地实现：
-  1. **Cursor Agent Worker**：参谋用 `prepare_cursor_agent_task` 准备任务包；你在 Cursor 里**新开 Agent 窗口**，把任务包交给工兵执行。
+  1. **Cursor Agent Worker**（**手动交接**）：参谋用 `prepare_cursor_agent_task` 准备任务包；你在 Cursor 里**新开 Agent 窗口**，复制任务包执行；完成后把工兵摘要带回主参谋（结果**不会**从工兵窗口自动回到主对话）。
   2. **External API Worker**：你在环境变量等配置**自己的模型 API** 后，参谋通过 `chief_external_preflight` / `dispatch_worker` 派发（工具**不显示**密钥值）。
 - 新 Agent Chat 的期望开场顺序：先说明参谋工作方式（主参谋角色、默认不直接写代码、两条工兵路线、后续可切换路线）→ 再问当前目标的关键选择 → 再给建议。
 - 路线选择应中性说明差异：  

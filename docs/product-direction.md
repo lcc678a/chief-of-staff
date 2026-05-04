@@ -82,7 +82,7 @@ Stage 2 候选（与发布说明对齐）：
 - **Model strategy (common pattern, not a mandate):** users may pair a **stronger reasoning model** in the **Chief** chat with **different** worker models (faster/cheaper/specialized) for implementation. **Cursor** model pickers remain **user-controlled** in each Agent surface; **External API Worker** models come from user **provider/model** configuration. Chief-of-Staff **does not claim** to force or auto-switch Cursor models.
 - **One visible chief agent; tools stay behind the workflow:** doctor / audit / next_action / prepare / dispatch are implementation details—the experience is “I ask the chief; the chief tells me what to do next,” not “I manage a pile of tool names.”
 - **Short main context; workers for isolated tasks:** split work into tasks, push execution that does not need the user’s ongoing presence to workers, and bring back concise summaries; the chief stays grounded via `.chief/` state and summaries, not endless chat history.
-- **Two recommended modes:** single-chief mode for beginners and small efforts; chief + workers when the project grows and parallelization or context savings matter (see [docs/product-principles.zh-CN.md](product-principles.zh-CN.md)).
+- **Usage modes:** single-chief mode for beginners and small efforts; chief + workers when the project grows and parallelization or context savings matter (see [docs/product-principles.zh-CN.md](product-principles.zh-CN.md)).
 - **Known UX issues (not fixed in v0.1 narrative):** task-package display in the Cursor/MCP chain may be compressed or unstable; Agent window naming still relies on the user’s manual Rename—stronger naming conventions are a follow-up.
 
 ## Future Directions

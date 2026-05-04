@@ -38,7 +38,7 @@ You interact with **one visible Chief** in the main Agent chat:
 - The Chief **tracks** agreed work in `.chief/` when useful.
 - In a **new chat**, the Chief should first explain this working mode (Chief role, worker routes, non-default direct coding) before proposing concrete product plans.
 - **By default, the Chief does not create or edit application code** in that chat. **Implementation** goes to:
-  - **Cursor Agent Worker** — the Chief prepares a **copyable task package**; you open a **separate Cursor Agent window** and paste it to the worker; the worker executes; you or the Chief records results.
+  - **Cursor Agent Worker** — the Chief prepares a **copyable task package**; you open a **separate Cursor Agent window** and paste it to the worker; the worker executes; **you bring the worker summary back to the Chief**, and the Chief records the result when useful.
   - **External API Worker** — you configure **your own** provider / model / API keys (env vars); the Chief uses **preflight** then **dispatch** when the route is appropriate.
 - The Chief explains both routes neutrally and asks which route you want when implementation is ready.
 - The route is **not final**: you can switch worker route or product direction later, and the Chief should update the plan before preparing/dispatching work.
@@ -71,7 +71,7 @@ How you set that up:
 
 That separation lets you put **higher-quality thinking and coordination** in the Chief chat while **routing execution** through workers that fit cost, latency, or specialization—without claiming Chief-of-Staff controls every model picker in Cursor.
 
-## Two recommended modes
+## Usage modes
 
 ### Chief-only mode
 
@@ -97,7 +97,7 @@ Best for:
 - Local code changes with a clear file scope
 - Tasks that do not require the user’s full context in the Chief chat
 
-The Chief keeps the **main conversation short**; **Cursor Agent Workers** or **External API Workers** carry implementation. Workers report back with **summaries**, which saves tokens and reduces confusion.
+The Chief keeps the **main conversation short**; **Cursor Agent Workers** or **External API Workers** carry implementation. **Cursor Agent Worker** is a **manual handoff**—you bring worker summaries back to the Chief. **External API Worker** runs after you configure provider/model/API; results return through the Chief-of-Staff flow. Concise summaries save tokens and reduce confusion.
 
 ## Cursor project setup
 
@@ -147,7 +147,8 @@ Example of what `init` writes for MCP (placeholder path only):
 
 ## Current status
 
-- **v0.1.1** patch: **`npx chief-of-staff-mcp init`** for one-step per-project setup (MCP config + default rule + `.chief/` baseline)
+- **v0.1.2**: one-step per-project setup via **`npx chief-of-staff-mcp init`** (MCP config + default rule + `.chief/` baseline)
+- **v0.1.2** also documents the Chief / Worker boundary, first-time Cursor MCP enable behavior, and the stronger-Chief / flexible-Workers model strategy
 - **Cursor MCP first**; no claim of support for platforms we have not tested
 - **Project-level MCP** exercised locally in a Cursor project Agent
 - **`chief_doctor`**, **`chief_next_action`**, and **`chief_audit`** verified in that context

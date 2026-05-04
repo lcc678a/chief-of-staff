@@ -58,13 +58,14 @@ Chief-of-Staff **organizes the workflow**; it does **not** pretend to control ev
 - The Chief prepares a **task package** (`prepare_cursor_agent_task`).
 - You open a **separate Cursor Agent window**.
 - You **paste** the task package into that worker.
-- The worker implements; you or the Chief records the outcome (`submit_worker_result`).
+- The worker implements; **you bring the worker summary back to the Chief**, and the Chief records the outcome when useful (`submit_worker_result`). Results do **not** return automatically from the worker window.
 
 ### External API Worker
 
 - You configure **your own** provider / model / API (environment variables; see `chief_config_help`).
 - The Chief runs **`chief_external_preflight`** before dispatch.
 - The Chief calls **`dispatch_worker`** only when configuration and route fit.
+- Outcomes return into the Chief-of-Staff worker/task flow (status tools, summaries, `submit_worker_result` when applicable)—not a parallel silo outside the Chief workflow.
 - **No API key values** are printed by tools.
 
 ## Advanced / manual MCP setup
@@ -122,7 +123,7 @@ After MCP changes, **restart Cursor** and use a **project-scoped** Agent chat.
 
 ## Status and scope
 
-- **v0.1.1** — CLI **`init`** plus default **Chief/worker** Cursor rule
+- **v0.1.2** — CLI **`init`** plus default **Chief/worker** Cursor rule; docs clarify manual Cursor Agent Worker handoff and MCP first-enable behavior
 - **Cursor MCP** is the primary integration
 - **Cursor SDK** auto-dispatch is **not** shipped; design/research only
 - **No** untested-platform support claims

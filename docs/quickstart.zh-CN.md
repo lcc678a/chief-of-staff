@@ -21,7 +21,7 @@
 6. 你提出目标（例如产品想法）。
 7. 对**模糊目标**，Chief **先问关键选择**（平台、数据、登录、MVP、工兵路线等），**不**直接大段写代码；并中性说明两条路线的执行差异，再请你选择。
 8. 方向一致后，Chief 用 `plan_tasks` 等**登记任务**，并用 `prepare_cursor_agent_task` 准备 **Cursor 工兵任务包**，或在你配置好 API 后走 **External** 预检与派发。
-9. 你选择 **Cursor Agent Worker**（新开 Agent 窗口粘贴任务包）或 **External API Worker**；简单实现通常**一个**工兵任务即可。
+9. 你选择 **Cursor Agent Worker** 或 **External API Worker**。**Cursor Agent Worker** 是**手动交接**：参谋准备任务包，你在新 Agent 窗口复制执行，完成后把工兵摘要带回主参谋（**不会**自动回传）。**External API Worker** 需在环境变量等配置好 provider/model/API 后派发，结果经 Chief-of-Staff 流程回收。简单实现通常**一个**工兵任务即可。
 
 **反例（不符合产品设定）**：你说「我想做学习软件」，Agent **立刻**搭栈、改很多文件。  
 **正例**：Chief **先问**目标用户、平台（小程序/Web/桌面等）、数据与登录、MVP 范围、更倾向哪种工兵路线，再总结待确认方向并准备任务/任务包。
@@ -100,6 +100,8 @@ C:\Users\lichangchun\Desktop\chief-of-staff
 说明会调用 `chief_next_action`，从当前任务队列压缩出可执行建议。
 
 ## 5. 创建 Cursor 工兵任务
+
+**手动交接**：任务包不会自动从工兵窗口回到主参谋；完成后请把工兵摘要带回主参谋对话（或由主参谋指导你用 `submit_worker_result` 登记）。
 
 示例：
 
