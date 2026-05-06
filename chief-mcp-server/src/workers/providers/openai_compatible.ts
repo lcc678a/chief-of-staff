@@ -1,18 +1,33 @@
 import type { ChiefConfig } from "../../types.js";
 import type { LLMProvider } from "./types.js";
 
-export class DashscopeProvider implements LLMProvider {
-  name = "dashscope";
+/**
+ * Generic OpenAI-compatible Chat Completions provider.
+ *
+ * The provider key in `config.providers` is treated as a free-form identifier
+ * (e.g. `dashscope`, `openai`, `deepseek`, `moonshot`, ...). The provider does
+ * not hardcode any specific vendor name; it just reads `base_url` /
+ * `api_key_env` / models from the matching `providers[<name>]` entry.
+ */
+export class OpenAICompatibleProvider implements LLMProvider {
+  readonly name: string;
   private readonly apiKeyEnv: string;
   private readonly baseUrl: string;
 
-  constructor(config: ChiefConfig) {
-    const provider = config.providers.dashscope;
+  constructor(name: string, config: ChiefConfig) {
+    this.name = name;
+    const provider = config.providers[name];
     if (!provider) {
-      throw new Error("Provider config for dashscope is missing");
+      throw new Error(`Provider config for "${name}" is missing in .chief/config.json`);
+    }
+    if (!provider.api_key_env || provider.api_key_env.trim() === "") {
+      throw new Error(`Provider "${name}" has no api_key_env configured`);
+    }
+    if (!provider.base_url || provider.base_url.trim() === "") {
+      throw new Error(`Provider "${name}" has no base_url configured`);
     }
     this.apiKeyEnv = provider.api_key_env;
-    this.baseUrl = provider.base_url;
+    this.baseUrl = provider.base_url.replace(/\/+$/, "");
   }
 
   async complete(args: {
@@ -44,10 +59,12 @@ export class DashscopeProvider implements LLMProvider {
 
     if (!response.ok) {
       const body = await response.text();
-      throw new Error(`Dashscope request failed (${response.status}): ${body}`);
+      throw new Error(
+        `Provider "${this.name}" request failed (${response.status}): ${body.slice(0, 500)}`
+      );
     }
     if (!response.body) {
-      throw new Error("Dashscope response body is empty");
+      throw new Error(`Provider "${this.name}" response body is empty`);
     }
 
     const reader = response.body.getReader();

@@ -1,10 +1,35 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { readConfig } from "../lib/config.js";
-import { PROJECT_ROOT } from "../lib/paths.js";
 import { getTask, readTasks, updateTask } from "../lib/tasks_store.js";
 import type { ChiefConfig, ModelLevel, Task } from "../types.js";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+
+/**
+ * Resolve the absolute path of the compiled worker script.
+ *
+ * Production layout (npm/npx install):
+ *   <pkg>/dist/tools/dispatch_worker.js  → "../workers/run_worker.js"
+ *
+ * Local dev layout (ts-node loads src/, compiled output sits next to src/):
+ *   <pkg>/src/tools/dispatch_worker.ts   → "../../dist/workers/run_worker.js"
+ *
+ * The user project's CWD is irrelevant — never resolve the worker script
+ * relative to the user project, because the package code lives in the npm
+ * cache when installed via `npx chief-of-staff-mcp`.
+ */
+function resolveWorkerScriptPath(): string {
+  const sibling = path.resolve(HERE, "..", "workers", "run_worker.js");
+  if (existsSync(sibling)) {
+    return sibling;
+  }
+  const devFallback = path.resolve(HERE, "..", "..", "dist", "workers", "run_worker.js");
+  return devFallback;
+}
 
 export const dispatchWorkerInputSchema = z.object({
   task_id: z.string(),
@@ -125,23 +150,56 @@ export async function dispatchWorker(rawInput: unknown): Promise<string> {
     model,
     started_at: new Date().toISOString(),
     finished_at: undefined,
-    error: undefined
+    error: undefined,
+    result_file: undefined,
+    summary: undefined
   });
 
-  const workerScriptPath = path.join(PROJECT_ROOT, "chief-mcp-server", "dist", "workers", "run_worker.js");
-  const child = spawn("node", [workerScriptPath, input.task_id], {
+  const workerScriptPath = resolveWorkerScriptPath();
+  if (!existsSync(workerScriptPath)) {
+    await updateTask(input.task_id, {
+      status: "failed",
+      finished_at: new Date().toISOString(),
+      error: `worker script not found: ${workerScriptPath}`,
+      pid: undefined
+    });
+    return withHint(
+      `派发失败：找不到工兵脚本 \`${workerScriptPath}\`。包安装可能不完整，请重装 \`chief-of-staff-mcp\`。`
+    );
+  }
+
+  const child = spawn(process.execPath, [workerScriptPath, input.task_id], {
     detached: true,
-    stdio: ["ignore", "ignore", "ignore"]
+    stdio: ["ignore", "ignore", "ignore"],
+    cwd: process.cwd(),
+    env: process.env
+  });
+  child.on("error", () => {
+    void updateTask(input.task_id, {
+      status: "failed",
+      finished_at: new Date().toISOString(),
+      error: "failed to spawn worker process",
+      pid: undefined
+    });
   });
   child.unref();
 
   await updateTask(input.task_id, {
-    pid: child.pid
+    pid: child.pid,
+    log_file: `.chief/logs/${input.task_id}.log`
   });
 
-  return `已派出 ${input.task_id}
+  return `已派出 ${input.task_id}（**后台运行**，主参谋不需要原地等待）
 
 - 状态：running
+- 工兵路线：external
 - 工兵模型：${providerName} / ${model}
-- pid：${child.pid}`;
+- pid：${child.pid}
+- log_file：\`.chief/logs/${input.task_id}.log\`
+- 工作脚本：\`${workerScriptPath}\`
+
+下一步：
+- 用户可以**继续与主参谋交流**，外部工兵在后台跑。
+- 任务完成后会自动写入 \`.chief/results/${input.task_id}.md\`，并把 \`result_file\` / \`summary\` 写回 task。
+- 主参谋默认**只读** \`get_worker_status\` / \`get_worker_summary\`（status / summary / result_file / log_file），**不**自动读取完整结果或完整日志，避免吃 token；用户明确要求时再打开 \`result_file\`。`;
 }

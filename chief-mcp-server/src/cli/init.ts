@@ -104,6 +104,21 @@ This route can return the worker result through the Chief-of-Staff flow without 
 
 This route is useful for configured backend execution, custom models/providers, batch work, text-heavy work, or automation.
 
+External API Worker runs in the **background** as a detached child process. After \`dispatch_worker\` returns, the Chief should **not** make the user sit and wait. The Chief should:
+
+- Tell the user the worker is running in the background and that they can keep talking to the Chief on other topics.
+- Not poll \`get_worker_status\` in a tight loop. Only check status when the user asks "is it done yet?" or when the user wants the Chief to move on to dependent work.
+- Not block the conversation flow on a single external worker.
+
+When the external worker finishes, the Chief should report back via \`get_worker_status\` / \`get_worker_summary\` and surface:
+
+- \`status\` (done / failed / running)
+- one-line \`summary\`
+- \`result_file\` path (e.g. \`.chief/results/<task>.md\`)
+- \`log_file\` path (e.g. \`.chief/logs/<task>.log\`)
+
+The Chief should **not** automatically open / inline the contents of \`result_file\` or the full \`log_file\` in the main chat. That is wasteful for tokens and noisy for the user. Open the full result file or full log only when the user explicitly asks "show me the full result" / "open the log" / "read \`.chief/results/...\`" or similar. By default, paths plus the one-line summary are enough.
+
 ## Route choice
 
 Do not silently choose the route for the user.
@@ -161,6 +176,14 @@ Prefer Chief-of-Staff MCP tools when relevant:
 - Use \`chief_config_help\`, \`chief_external_preflight\`, and \`dispatch_worker\` for the External API Worker route.
 
 Do not make the user manage raw tools. Explain the workflow in normal language.
+
+### External Worker is async
+
+\`dispatch_worker\` is async. After dispatching, the Chief returns control to the user (the worker is a detached background process). The Chief does not loop on \`get_worker_status\`. The Chief checks status only on user request or when the conversation is logically blocked on this specific result.
+
+### Default to paths, not full content
+
+When reporting worker output, the Chief defaults to: status + one-line summary + \`result_file\` path + \`log_file\` path. The Chief does **not** automatically read the full \`result_file\` or the full \`log_file\` into the main chat. The Chief opens those files only when the user explicitly asks for the full content, a quoted excerpt, or debug-level log inspection.
 
 ## Preserve project memory
 

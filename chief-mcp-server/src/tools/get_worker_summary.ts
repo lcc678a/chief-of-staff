@@ -128,28 +128,56 @@ export async function getWorkerSummary(rawInput: unknown): Promise<string> {
   const provider = task.provider ?? "unknown";
   const model = task.model ?? "unknown";
   const reportedModel = task.reported_model ? ` · reported_model=\`${task.reported_model}\`` : "";
-  const resultFile = task.result_file ? `\n- result_file: \`${task.result_file}\`` : "";
+  const logFileLine = task.log_file
+    ? `\n- log_file: \`${task.log_file}\``
+    : `\n- log_file: \`.chief/logs/${task.id}.log\`（可能尚未生成）`;
+  const resultFileLine = task.result_file
+    ? `\n- result_file: \`${task.result_file}\``
+    : task.status === "done"
+      ? `\n- result_file: \`.chief/results/${task.id}.md\`（尚未写入）`
+      : "";
   const header = `**${task.id}** · \`${task.status}\` · route=\`${workerRoute}\` · provider=\`${provider}\` · model=\`${model}\`${reportedModel}`;
+
+  if (task.status === "running") {
+    return `${header}
+
+- 工兵路线：external
+- 工兵模型：${provider} / ${model}${logFileLine}
+${dependencyCountLine}
+
+外部工兵仍在**后台**运行；用户可继续与主参谋交流。再需查询时调用 \`get_worker_status\` 即可，**不要**自动反复轮询。`;
+  }
 
   if (task.status !== "done" && task.status !== "blocked" && task.status !== "failed") {
     return `${header}
 
 - 工兵路线：external
-- 工兵模型：${provider} / ${model}
+- 工兵模型：${provider} / ${model}${logFileLine}
 ${dependencyCountLine}
 
 Task ${task.id} is not done yet (status: ${task.status}).`;
   }
 
+  if (task.status === "failed") {
+    return `${header}
+
+- 工兵路线：external
+- 工兵模型：${provider} / ${model}${resultFileLine}${logFileLine}
+${dependencyCountLine}
+
+- 错误：${task.error ?? "(unknown)"}
+
+注意：完整日志在 \`log_file\`，**默认不要**自动读完整日志；用户明确要求再打开。`;
+  }
+
   return `${header}
 
 - 工兵路线：external
-- 工兵模型：${provider} / ${model}
+- 工兵模型：${provider} / ${model}${resultFileLine}${logFileLine}
 ${dependencyCountLine}
-
-${resultFile}
-
 ${fileScopeCountLine}
 
-${task.summary ?? ""}`;
+- 摘要：${task.summary ?? "(empty)"}
+
+注意：完整结果在 \`result_file\`，**默认不要**自动打开（避免吃 token）；用户明确要求时再读。`;
 }

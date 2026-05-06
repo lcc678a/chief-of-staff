@@ -62,10 +62,12 @@ Chief-of-Staff **organizes the workflow**; it does **not** pretend to control ev
 
 ### External API Worker
 
-- You configure **your own** provider / model / API (environment variables; see `chief_config_help`).
+- You configure **your own** provider / model / API (environment variables; see `chief_config_help`). The provider key in `.chief/config.json` is **free-form** (`openai`, `dashscope`, `deepseek`, `moonshot`, ...); anything that exposes an OpenAI-compatible `/chat/completions` endpoint with `Authorization: Bearer <key>` works.
 - The Chief runs **`chief_external_preflight`** before dispatch.
 - The Chief calls **`dispatch_worker`** only when configuration and route fit.
-- Outcomes return into the Chief-of-Staff worker/task flow (status tools, summaries, `submit_worker_result` when applicable)—not a parallel silo outside the Chief workflow.
+- The worker is a **detached background process**. `dispatch_worker` returns immediately; the Chief should **not** block the user waiting on it.
+- Outcomes are written to the task ledger plus a persisted result file: `.chief/results/<task>.md` (full output) and `.chief/logs/<task>.log` (streaming log). The task gets `summary`, `result_file`, `log_file`, and final `status`.
+- Default Chief reporting back to the user is **paths-first**: status + one-line summary + `result_file` path + `log_file` path. The Chief opens the full result/log only when the user explicitly asks.
 - **No API key values** are printed by tools.
 
 ## Advanced / manual MCP setup
@@ -123,6 +125,7 @@ After MCP changes, **restart Cursor** and use a **project-scoped** Agent chat.
 
 ## Status and scope
 
+- **v0.1.3** — critical hotfix for the **External API Worker** route. Fixes the `dispatch_worker` worker-script path (resolved relative to the installed package, not the user project), removes the hardcoded `dashscope` provider name (any OpenAI-compatible provider key works), serializes streaming log writes, persists the full worker output to `.chief/results/<task>.md`, and documents the route as **async + paths-first** (Chief does not block the user, does not auto-read full results into the main chat).
 - **v0.1.2** — CLI **`init`** plus default **Chief/worker** Cursor rule; docs clarify manual Cursor Agent Worker handoff and MCP first-enable behavior
 - **Cursor MCP** is the primary integration
 - **Cursor SDK** auto-dispatch is **not** shipped; design/research only

@@ -125,7 +125,8 @@ ${logs}
   const provider = task.provider ?? "unknown";
   const model = task.model ?? "unknown";
   const pidText = task.pid ? ` · pid=${task.pid}` : "";
-  const resultText = task.result_file ? ` · result_file=${task.result_file}` : "";
+  const resultFile = task.result_file ?? `.chief/results/${task.id}.md`;
+  const logFile = task.log_file ?? `.chief/logs/${task.id}.log`;
   const tailLine =
     task.status === "done"
       ? ` · summary=${task.summary ?? "(empty)"}`
@@ -135,11 +136,22 @@ ${logs}
   const fileScopeLine = formatFileScopeSection(task);
   const dependencyLine = formatDependencySection(task);
 
-  return `**${task.id}** · \`${task.status}\` · route=\`${workerRoute}\` · provider=\`${provider}\` · model=\`${model}\`${pidText}${resultText}${tailLine}
-工兵路线：external
-工兵模型：${provider} / ${model}
-${dependencyLine}
-${fileScopeLine}
+  const backgroundHint =
+    task.status === "running"
+      ? "\n\n说明：外部 API 工兵在**后台**运行，主参谋无需原地等待；用户可继续与主参谋交流。再次需要查询时再调用 `get_worker_status`。"
+      : "";
+
+  const readingHint =
+    task.status === "done" || task.status === "failed"
+      ? "\n\n注意：默认**不要**自动打开 `result_file` 或完整日志，避免吃 token；用户明确要求时再读 `result_file`。"
+      : "";
+
+  return `**${task.id}** · \`${task.status}\` · route=\`${workerRoute}\` · provider=\`${provider}\` · model=\`${model}\`${pidText}${tailLine}
+
+- 工兵路线：external
+- 工兵模型：${provider} / ${model}
+- result_file：\`${resultFile}\`${task.result_file ? "" : "（尚未生成）"}
+- log_file：\`${logFile}\`${dependencyLine}${fileScopeLine}
 
 <details>
 <summary>📜 最近日志（最后 20 行）</summary>
@@ -147,5 +159,5 @@ ${fileScopeLine}
 \`\`\`
 ${logs}
 \`\`\`
-</details>`;
+</details>${backgroundHint}${readingHint}`;
 }

@@ -52,6 +52,28 @@ Check:
 - `worker_route === "cursor_agent"` without explicit `provider`/`model` in tool args → no dispatch; Chinese guidance.
 - Config read / missing provider / missing model / unset `api_key_env` / unset env → failure + short `chief_external_preflight` / `chief_config_help` hint; env **name** only, never values.
 - Provider/model resolution unchanged: `input` → `task` → `default_provider` / `models[model_level]`.
+- (0.1.3) Worker script path is resolved relative to the **installed package** (`dist/workers/run_worker.js` next to `dist/tools/dispatch_worker.js`), **not** under the user project's `chief-mcp-server/dist/...`. `npx`-installed users must successfully spawn the worker.
+- (0.1.3) When the resolved worker script is missing, dispatch sets the task to `failed` with a clear error and does not leave the task stuck in `running`.
+- (0.1.3) Tool reply explicitly tells the Chief the worker is running in the **background** and the user does not need to wait; reply also surfaces `result_file` and `log_file` paths plus a no-auto-read reminder.
+
+## External API Worker runtime (run_worker)
+
+Check:
+
+- (0.1.3) Provider name in `.chief/config.json` is free-form. Any key (e.g. `openai`, `dashscope`, `deepseek`, `moonshot`) routes through the generic OpenAI-compatible provider; `getProvider` does not hardcode `dashscope`.
+- (0.1.3) `run_worker` picks provider in this order: `task.provider` → `config.default_provider`; matches `dispatch_worker` resolution.
+- (0.1.3) Streaming log writes are serialized; chunks land in `.chief/logs/<task>.log` in arrival order. Worker awaits the log queue before writing the worker-done / worker-failed footer.
+- (0.1.3) On success, the worker writes the **full** model output to `.chief/results/<task>.md` and updates the task with `result_file`, `log_file`, `summary`, `finished_at`, `status: done`.
+- (0.1.3) On failure, the worker writes the failure footer to `.chief/logs/<task>.log` and updates the task with `error`, `log_file`, `status: failed`. No partial result file is written for failed runs.
+
+## get_worker_status / get_worker_summary (paths-first)
+
+Check:
+
+- (0.1.3) `get_worker_status` for an external task surfaces `status`, `provider`, `model`, `pid`, `result_file`, `log_file`, plus a 20-line log tail. It does **not** inline the full result file.
+- (0.1.3) `get_worker_summary` for an external `done` task surfaces `summary`, `result_file`, `log_file` plus a reminder that the Chief should not auto-open the full result.
+- (0.1.3) Tool descriptions in `ListTools` say the Chief should default to paths and not auto-read full content.
+- (0.1.3) Default Cursor rule (`init.ts`) tells the Chief that External Worker is async (do not make the user wait) and paths-first (do not auto-open `result_file` / full log).
 
 ## Cursor worker handoff
 

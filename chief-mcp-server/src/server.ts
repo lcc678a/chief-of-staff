@@ -32,7 +32,7 @@ function toJsonSchema(schema: ZodTypeAny): object {
 const server = new Server(
   {
     name: "chief-mcp-server",
-    version: "0.1.1"
+    version: "0.1.3"
   },
   {
     capabilities: {
@@ -51,17 +51,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       },
       {
         name: "dispatch_worker",
-        description: "Dispatch one pending task to worker process",
+        description:
+          "Spawn a detached External API Worker child process for one pending task. Returns immediately (background); Chief should NOT block the user waiting for the worker. Final result lands in `.chief/results/<task>.md` (`result_file`) plus a one-line `summary`; logs stream to `.chief/logs/<task>.log`. Provider key in config is free-form; the worker script path is resolved relative to the installed package, not the user project.",
         inputSchema: toJsonSchema(dispatchWorkerInputSchema)
       },
       {
         name: "get_worker_status",
-        description: "Get worker task status with latest log tail",
+        description:
+          "Read worker task status (status / pid / provider / model / result_file / log_file) plus a short log tail. Default Chief usage: read this when the user asks 'is it done yet?'. Do NOT auto-open `result_file` or read the full log unless the user explicitly asks.",
         inputSchema: toJsonSchema(getWorkerStatusInputSchema)
       },
       {
         name: "get_worker_summary",
-        description: "Get final summary or error for a task",
+        description:
+          "Read final outcome paths and the one-line `summary` for a task (status / outcome / result_file / log_file / summary / error). Default Chief usage: report these fields back to the user; do NOT inline the full result file content unless the user explicitly asks for it.",
         inputSchema: toJsonSchema(getWorkerSummaryInputSchema)
       },
       {
