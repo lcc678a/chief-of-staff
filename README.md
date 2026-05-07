@@ -3,7 +3,7 @@
 
 <h1 align="center">Chief-of-Staff</h1>
 <p align="center"><b>Stop your AI coding agent from losing the plot.</b></p>
-<p align="center"><i>An MCP server for Cursor that keeps one clear chief agent in charge — so your project stays sane.</i></p>
+<p align="center"><i>A project governance layer for Cursor agents — persistent task state, safety gates, and auditable handoffs.</i></p>
 
 ---
 
@@ -21,7 +21,7 @@ That's not a you problem. That's what happens when a long chat becomes a project
 
 ## What Chief-of-Staff does
 
-Chief-of-Staff runs **alongside Cursor** as a quiet "chief of staff" for your project.
+Chief-of-Staff runs **alongside Cursor** as a governance layer for your project.
 
 You keep talking to **one** Chief agent in your main chat. In the background, Chief-of-Staff:
 
@@ -29,9 +29,20 @@ You keep talking to **one** Chief agent in your main chat. In the background, Ch
 - Asks **clarifying questions** before the AI starts coding, so vague goals don't turn into rewrites.
 - Suggests **one clear next action** when you don't know what to do.
 - **Audits** for inconsistencies — half-finished tasks, drifted scope, broken dependencies.
-- Routes implementation to **workers** (a separate Cursor Agent window, or your own external API) instead of letting the main chat silently become a solo programmer.
+- Routes implementation through **auditable worker handoffs** so the main chat stays a chief, not an untracked solo programmer.
 
-You stay in flow. The AI stays clear. The project stays a project, not a 4-hour conversation.
+Cursor helps agents do work. Chief-of-Staff helps the project stay accountable.
+
+## Positioning
+
+Chief-of-Staff is **not** a Cursor replacement and **not** another Agent shell.
+
+It is the governance layer above Cursor Agents:
+
+- **State consistency** via a persistent project ledger (`.chief/`)
+- **Safety gates** before execution (dependencies, route checks, readiness checks)
+- **Auditable progress** across windows and long conversations
+- **One clear next step** even when the queue is messy
 
 ## Install in 30 seconds
 
@@ -62,7 +73,7 @@ Then **restart Cursor**, make sure `chief-of-staff` is **enabled** in Cursor's M
 >
 > So I built Chief-of-Staff. First for myself. Now for anyone whose AI keeps going off the rails.
 
-That's the entire pitch. It's a coordination layer, not a smarter model.
+That's the entire pitch. It's a governance layer, not a smarter model.
 
 ## Who it's for
 
@@ -83,12 +94,12 @@ You interact with **one visible Chief** in your main Agent chat:
   - **Cursor Agent Worker** — the Chief gives you a copyable task package; you paste it into a separate Cursor Agent window; the worker implements; you bring the summary back to the Chief.
   - **External API Worker** — you configure your own provider / model / API keys; the Chief uses preflight then dispatch when the route fits.
 - Short replies like **"ok" / "yes" / "继续"** are **not** approval to edit files, register tasks, or dispatch workers. The Chief asks before doing.
-- Simple work is **one** worker task. Complex work splits into a few tasks with scopes and dependencies — not a multi-agent zoo.
+- Simple work is **one** worker task. Complex work splits into a few tasks with scopes and dependencies.
 - The Chief **only** makes a small direct edit in the main chat when **you explicitly ask**.
 
-### External API Worker note
+### External API Worker (Advanced)
 
-External API Workers run as detached background processes. The Chief should not make you wait in the main chat. Results are written to `.chief/results/<task>.md`, logs to `.chief/logs/<task>.log`, and the Chief reports summary + paths first. It opens full results only when you ask.
+External API Workers run as detached background processes. This route is powerful for custom backends and batch execution, but it is an **advanced path** for users who already manage provider/model/API configuration. Results are written to `.chief/results/<task>.md`, logs to `.chief/logs/<task>.log`, and the Chief reports summary + paths first.
 
 ## Stronger Chief, flexible Workers
 
@@ -107,7 +118,7 @@ That separation lets you put high-quality thinking in the Chief and route execut
 
 ## Core tools
 
-A short list — not a full API reference:
+The product experience should stay workflow-first ("what next?"), while tools stay in the background.
 
 | Tool | Role |
 |------|------|
@@ -119,7 +130,7 @@ A short list — not a full API reference:
 | `prepare_cursor_agent_task` | Prepare a Cursor worker handoff package |
 | `submit_worker_result` | Record worker results |
 | `get_worker_board` / `get_worker_status` / `get_worker_summary` | Inspect worker state |
-| `chief_config_help`, `chief_external_preflight`, `dispatch_worker` | External API worker route |
+| `chief_config_help`, `chief_external_preflight`, `dispatch_worker` | External API worker route (advanced) |
 
 ## Troubleshooting: Chief tools don't appear
 
@@ -148,6 +159,7 @@ A short list — not a full API reference:
 - **Project-level MCP** must be used in **project context** (open the repo; use a project Agent chat).
 - Config tools **never print** API key values.
 - **Cursor SDK dispatch** for workers is **not implemented** in this release.
+- Chief-of-Staff does **not** claim to auto-open/rename windows or auto-control Cursor models.
 - **Every new project** needs its own setup: run `npx chief-of-staff-mcp init` from that project root, or maintain `.cursor/mcp.json` manually.
 
 ## Documentation

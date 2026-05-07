@@ -2,6 +2,11 @@
 
 英文产品概览见仓库根目录 [README.md](../README.md)。
 
+定位先讲清：
+
+- Chief-of-Staff **不是** Cursor 替代品，也**不是**另一个 Agent 壳。
+- 它是 Cursor Agents 之上的**项目治理层**：维护项目账本、任务状态、安全门控与可审计交接。
+
 ## 安装 MCP（Cursor）
 
 - **已发布 npm 包时（推荐）**：在**目标项目根目录**执行 `npx chief-of-staff-mcp init`（详见 [docs/install-cursor.zh-CN.md](./install-cursor.zh-CN.md)「推荐方式」），一次性生成 MCP 配置、默认 Cursor rule 与 `.chief/`。
@@ -10,6 +15,7 @@
 - **首次验证 MCP 时**：`init` 后请 **Reload / Restart Cursor**，并在 Cursor **MCP 设置**里确认 **`chief-of-staff` 已启用**（部分版本新加的 MCP 可能默认关闭）。然后在**已打开目标项目**的 Cursor 窗口内，**新建** Agent Chat / Agent Window 再测（详见安装文档「在项目窗口内测试 MCP」）。若 Agent Chat 里看不到 `chief_doctor` / `chief_next_action` 等工具，**先检查 MCP 是否已启用**。从 **Cursor Home / 全局 Agent** 测试时若看不到项目级 MCP，**不代表**安装失败。
 - **推荐自测顺序**：`chief_doctor` → `chief_next_action` → `chief_audit`（均由 Agent 在对话中触发调用即可）。
 - **模型策略（常见用法）**：建议在**主 Chief 对话**里选用**更强的推理模型**；若使用 **Cursor Agent Worker**，可在**工兵窗口**选择适合执行的模型；若使用 **External API Worker**，则通过 **provider/model/API** 配置选择外部模型。Chief-of-Staff **不**替你自动切换 Cursor 模型。
+- **路线优先级**：默认先走 Cursor Agent Worker 可审计交接；External API Worker 作为高级路线按需启用。
 
 ## 从零开始的推荐流程
 
@@ -115,7 +121,7 @@ C:\Users\lichangchun\Desktop\chief-of-staff
 - 可在 Agents 界面**右键 Agent → Rename**，改为建议的窗口名（若有 `window_hint`）。
 - 完成后调用 `submit_worker_result` 回传 `done` / `blocked` / `failed`。
 
-## 6. 使用外部 API 工兵
+## 6. 使用外部 API 工兵（高级）
 
 先检查配置：
 
@@ -135,6 +141,7 @@ C:\Users\lichangchun\Desktop\chief-of-staff
 - `chief_external_preflight`：只读预检是否满足派发条件（**不发真实请求**，不扣费）。
 - `dispatch_worker`：真正派发外部工兵。
 - Cursor 工兵路线**不需要**外部 API Key。
+- 这条路线适合已具备 provider/model/API 维护能力的用户；新手建议先用 Cursor 工兵路线。
 
 ## 7. 深度审计
 

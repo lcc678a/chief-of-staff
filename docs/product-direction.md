@@ -2,13 +2,13 @@
 
 ## Product Positioning
 
-Chief-of-Staff is the planning and coordination layer in a Cursor multi-Agent workflow.  
-It does not replace Cursor. It helps users run Cursor Agent work in a clearer and more reliable way.
+Chief-of-Staff is the governance layer for Cursor agents.  
+It does not replace Cursor, and it is not another Agent shell. It keeps project execution state consistent, guarded, and auditable.
 
 ## Core Metaphor
 
-- Cursor is the worker camp.
-- Chief-of-Staff is the command staff.
+- Cursor runs agent execution.
+- Chief-of-Staff governs project execution.
 
 ## Problems We Solve
 
@@ -17,6 +17,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 - Users lack a clear completion loop for done / blocked / failed outcomes.
 - Multi-window execution can become confusing without task-line guidance.
 - Complex projects need persistent status memory across turns.
+- Users need clear acceptance checkpoints before "done" and before commit/release decisions.
 
 ## What We Do Not Build
 
@@ -24,6 +25,7 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 - We do not replace Cursor Agent UI.
 - We do not build a complex GUI first.
 - In the short term, we do not depend on auto-creating Cursor Agent windows.
+- We do not rely on "orchestration novelty" as the core product value.
 
 ## Current Mainline
 
@@ -34,8 +36,8 @@ It does not replace Cursor. It helps users run Cursor Agent work in a clearer an
 - `dispatch_worker` mirrors those readiness rules before spawning an external worker: unfinished `depends_on`, missing env key, missing provider/model/config, or `cursor_agent` tasks without explicit provider/model → no dispatch; messages reference `chief_external_preflight` / `chief_config_help`.
 - MCP `chief_next_action` compresses queue state into one actionable next step (priority: blocked → failed → waiting → running → pending-deps → ready pending → done); read-only, does not run other tools for the user.
 - MCP `chief_audit` reports hidden inconsistencies (duplicate ids, dependency breaks, missing artifacts, file-scope overlaps, orphans); read-only and non-destructive—distinct from `chief_doctor` (light health), `chief_repair` (layout repair), `chief_next_action` (what to do next).
-- Cursor-first is not Cursor-only: External API Worker remains a long-term route for user custom models and API-driven automation.
-- External API Worker is especially important for user-owned provider/model strategy and scalable background execution.
+- Cursor-first is not Cursor-only: External API Worker remains a long-term advanced route for user custom models and API-driven automation.
+- External API Worker is valuable, but not the default narrative for mainstream vibe-coder onboarding.
 - Complex workflows should use depends_on/blocked_by and avoid unsafe parallelization of ordered tasks.
 - depends_on is not only a record field; it should be used as a safety gate before preparing downstream Cursor worker tasks.
 - Cursor window naming remains user-driven: Chief-of-Staff provides suggested names, and users can manually rename Agent windows in Cursor Agents.
@@ -77,10 +79,12 @@ Stage 2 候选（与发布说明对齐）：
 ## Product principles
 
 - **Keep the main AI and the user synchronized:** the user should always know what is in flight, what is next, and which task lives in which worker / Agent surface; the chief compresses state into a clear next step.
+- **Sell governance, not orchestration novelty:** avoid leading with "multi-agent dispatch" claims; lead with state consistency, safety gates, and auditable progress.
 - **Chief is coordination, not the default app author:** the Chief clarifies vague product intent before implementation, preserves project memory, and **by default** routes implementation through **Cursor Agent Worker** (separate Agent window + task package) or **External API Worker** (user-configured provider/model). The Chief does **not** silently turn the main chat into a bulk code-writing session; small direct edits only when the user explicitly asks.
 - **Onboarding order and confirmation semantics matter:** in a new conversation, the Chief should explain role + worker routes first, then ask key decisions, then suggest plans. Short acknowledgements ("ok", "继续", etc.) mean continue talking, not implicit approval to edit files, register tasks, prepare packages, or dispatch workers.
 - **Model strategy (common pattern, not a mandate):** users may pair a **stronger reasoning model** in the **Chief** chat with **different** worker models (faster/cheaper/specialized) for implementation. **Cursor** model pickers remain **user-controlled** in each Agent surface; **External API Worker** models come from user **provider/model** configuration. Chief-of-Staff **does not claim** to force or auto-switch Cursor models.
 - **One visible chief agent; tools stay behind the workflow:** doctor / audit / next_action / prepare / dispatch are implementation details—the experience is “I ask the chief; the chief tells me what to do next,” not “I manage a pile of tool names.”
+- **Hide internal tool complexity:** user-facing interaction should be plain-language workflow guidance ("what next", "what is blocked", "what to verify"), not a list of MCP tool names.
 - **Short main context; workers for isolated tasks:** split work into tasks, push execution that does not need the user’s ongoing presence to workers, and bring back concise summaries; the chief stays grounded via `.chief/` state and summaries, not endless chat history.
 - **Usage modes:** single-chief mode for beginners and small efforts; chief + workers when the project grows and parallelization or context savings matter (see [docs/product-principles.zh-CN.md](product-principles.zh-CN.md)).
 - **Known UX issues (not fixed in v0.1 narrative):** task-package display in the Cursor/MCP chain may be compressed or unstable; Agent window naming still relies on the user’s manual Rename—stronger naming conventions are a follow-up.

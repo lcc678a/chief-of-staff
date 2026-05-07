@@ -1,6 +1,6 @@
 # Chief-of-Staff MCP Server
 
-npm package for the **Chief-of-Staff** MCP server: a coordination layer for Cursor—the **Chief** plans and syncs; **workers** implement by default.
+npm package for the **Chief-of-Staff** MCP server: a governance layer for Cursor agents—the **Chief** keeps task state consistent, guarded, and auditable while workers implement.
 
 **Product overview:** see the repository root [README.md](../README.md).
 
@@ -31,8 +31,8 @@ For local development of this repo, use `node dist/server.js` with the same subc
 The generated **`.cursor/rules/chief-of-staff.mdc`** (`alwaysApply: true`) makes **new project Agent chats** follow the Chief-of-Staff workflow:
 
 - In a new project conversation, the Chief first explains the working mode and worker routes before proposing product plans.
-- The **Chief plans and coordinates**—clarifies vague product goals before coding, tracks state, suggests next steps.
-- **Implementation normally** goes through **Cursor Agent Worker** or **External API Worker**.
+- The **Chief governs execution flow**—clarifies vague product goals before coding, tracks state, applies safety gates, and suggests next steps.
+- **Implementation normally** goes through **Cursor Agent Worker** handoffs. External API Worker remains an advanced route.
 - The Chief should explain the practical effect of both routes and ask which route the user wants when implementation is ready.
 - The user can switch route/direction later; the Chief should update plans before preparing or dispatching work.
 - Short acknowledgements such as **"ok" / "yes" / "好" / "继续"** are continuation signals, not approval to edit files, register tasks, prepare packages, or dispatch workers.
@@ -63,6 +63,7 @@ Chief-of-Staff **organizes the workflow**; it does **not** pretend to control ev
 ### External API Worker
 
 - You configure **your own** provider / model / API (environment variables; see `chief_config_help`). The provider key in `.chief/config.json` is **free-form** (`openai`, `dashscope`, `deepseek`, `moonshot`, ...); anything that exposes an OpenAI-compatible `/chat/completions` endpoint with `Authorization: Bearer <key>` works.
+- This is an **advanced route**, not the default onboarding path for most Cursor-first users.
 - The Chief runs **`chief_external_preflight`** before dispatch.
 - The Chief calls **`dispatch_worker`** only when configuration and route fit.
 - The worker is a **detached background process**. `dispatch_worker` returns immediately; the Chief should **not** block the user waiting on it.
@@ -114,8 +115,8 @@ After MCP changes, **restart Cursor** and use a **project-scoped** Agent chat.
 
 ## What you get
 
-- MCP tools for health, repair, audits, task planning, Cursor worker packages, external workers, and read-only next-step guidance
-- A workflow built around **one Chief conversation** and **worker-side implementation**
+- MCP tools for health, repair, audits, task planning, worker handoffs, and read-only next-step guidance
+- A governance workflow built around **one Chief conversation** and **worker-side implementation**
 - **No** claim that Cursor Home / global Agents load project-level MCP
 
 ## Cursor behavior
