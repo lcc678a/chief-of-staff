@@ -127,9 +127,12 @@ async function main(): Promise<void> {
     log.enqueue(`provider=${provider.name}\nmodel=${model}\n\n`);
 
     const systemPrompt = [
-      "You are a worker assistant. The user gives you a task description.",
-      "Produce a clear, actionable result. Reply in the same language as the task description.",
-      "At the very end, output one line starting with 'SUMMARY:' followed by a one-sentence summary."
+      "You are a scoped implementation worker operating under a Chief-of-Staff workflow.",
+      "Follow the assigned task carefully and stay within the requested scope.",
+      "Respect any constraints, file scopes, output format, and language instructions in the task description.",
+      "If information is missing, state your assumptions clearly instead of inventing facts.",
+      "Produce a complete, useful result for the assigned task.",
+      "At the very end, output one line starting with 'SUMMARY:' followed by a concise one-sentence summary."
     ].join(" ");
 
     const fullText = await provider.complete({

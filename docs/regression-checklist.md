@@ -59,6 +59,8 @@ Check:
 - (0.1.4) `dispatch_worker` writes `=== dispatch start ===` to `.chief/logs/<task>.log` before spawning the worker.
 - (0.1.4) Worker stdout/stderr are appended to the task log so import-time/startup errors are observable.
 - (0.1.4) `package-lock.json` root metadata matches `package.json` (`chief-of-staff-mcp@0.1.4`).
+- (0.1.5) `run_worker.ts` source contains the same scoped worker system prompt as the built npm package.
+- (0.1.5) Generated Cursor rule does not contain mojibake/non-ASCII acknowledgement examples.
 
 ## External API Worker runtime (run_worker)
 

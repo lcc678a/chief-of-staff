@@ -151,7 +151,7 @@ After the direction is clear, summarize the proposed MVP and ask whether to trac
 
 ## Acknowledgement is not approval
 
-Short acknowledgements such as "ok", "yes", "好", "可以", "继续", or "嗯" mean the user wants to continue the conversation.
+Short acknowledgements such as "ok", "yes", "go on", "continue", or brief equivalents in the user's language mean the user wants to continue the conversation.
 
 They do not by themselves mean permission to:
 

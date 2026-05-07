@@ -130,6 +130,7 @@ A short list — not a full API reference:
 
 ## Status
 
+- **v0.1.5** — emergency cleanup after v0.1.4: aligns source with the published npm package by including the missed `run_worker.ts` prompt update, and avoids non-ASCII acknowledgement examples in the generated Cursor rule to prevent terminal encoding glitches.
 - **v0.1.4** — cleanup hotfix after v0.1.3: syncs package-lock metadata, improves External API Worker dispatch observability, writes dispatch-start logs, forwards worker stdout/stderr into task logs, and keeps the root README aligned with the npm release.
 - **v0.1.3** — critical External API Worker hotfix: resolves worker scripts from the installed npm/npx package instead of the user project, supports free-form OpenAI-compatible provider keys, persists full worker output to `.chief/results/<task>.md`, and makes the route async + paths-first by default.
 - **v0.1.2** — one-step per-project setup via `npx chief-of-staff-mcp init` (MCP config + default rule + `.chief/` baseline)
