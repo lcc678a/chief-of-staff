@@ -32,7 +32,7 @@ function toJsonSchema(schema: ZodTypeAny): object {
 const server = new Server(
   {
     name: "chief-mcp-server",
-    version: "0.1.3"
+    version: "0.1.4"
   },
   {
     capabilities: {

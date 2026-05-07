@@ -55,6 +55,10 @@ Check:
 - (0.1.3) Worker script path is resolved relative to the **installed package** (`dist/workers/run_worker.js` next to `dist/tools/dispatch_worker.js`), **not** under the user project's `chief-mcp-server/dist/...`. `npx`-installed users must successfully spawn the worker.
 - (0.1.3) When the resolved worker script is missing, dispatch sets the task to `failed` with a clear error and does not leave the task stuck in `running`.
 - (0.1.3) Tool reply explicitly tells the Chief the worker is running in the **background** and the user does not need to wait; reply also surfaces `result_file` and `log_file` paths plus a no-auto-read reminder.
+- (0.1.4) `dispatch_worker` checks the resolved worker script before setting task status to `running`.
+- (0.1.4) `dispatch_worker` writes `=== dispatch start ===` to `.chief/logs/<task>.log` before spawning the worker.
+- (0.1.4) Worker stdout/stderr are appended to the task log so import-time/startup errors are observable.
+- (0.1.4) `package-lock.json` root metadata matches `package.json` (`chief-of-staff-mcp@0.1.4`).
 
 ## External API Worker runtime (run_worker)
 

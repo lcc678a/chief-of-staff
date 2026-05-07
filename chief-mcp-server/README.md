@@ -125,6 +125,7 @@ After MCP changes, **restart Cursor** and use a **project-scoped** Agent chat.
 
 ## Status and scope
 
+- **v0.1.4** — cleanup hotfix: package-lock metadata sync, dispatch-start logs, worker stdout/stderr appended to task logs, and root README alignment after v0.1.3.
 - **v0.1.3** — critical hotfix for the **External API Worker** route. Fixes the `dispatch_worker` worker-script path (resolved relative to the installed package, not the user project), removes the hardcoded `dashscope` provider name (any OpenAI-compatible provider key works), serializes streaming log writes, persists the full worker output to `.chief/results/<task>.md`, and documents the route as **async + paths-first** (Chief does not block the user, does not auto-read full results into the main chat).
 - **v0.1.2** — CLI **`init`** plus default **Chief/worker** Cursor rule; docs clarify manual Cursor Agent Worker handoff and MCP first-enable behavior
 - **Cursor MCP** is the primary integration

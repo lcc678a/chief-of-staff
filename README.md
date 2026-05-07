@@ -86,6 +86,10 @@ You interact with **one visible Chief** in your main Agent chat:
 - Simple work is **one** worker task. Complex work splits into a few tasks with scopes and dependencies — not a multi-agent zoo.
 - The Chief **only** makes a small direct edit in the main chat when **you explicitly ask**.
 
+### External API Worker note
+
+External API Workers run as detached background processes. The Chief should not make you wait in the main chat. Results are written to `.chief/results/<task>.md`, logs to `.chief/logs/<task>.log`, and the Chief reports summary + paths first. It opens full results only when you ask.
+
 ## Stronger Chief, flexible Workers
 
 A common pattern (not a requirement):
@@ -126,6 +130,8 @@ A short list — not a full API reference:
 
 ## Status
 
+- **v0.1.4** — cleanup hotfix after v0.1.3: syncs package-lock metadata, improves External API Worker dispatch observability, writes dispatch-start logs, forwards worker stdout/stderr into task logs, and keeps the root README aligned with the npm release.
+- **v0.1.3** — critical External API Worker hotfix: resolves worker scripts from the installed npm/npx package instead of the user project, supports free-form OpenAI-compatible provider keys, persists full worker output to `.chief/results/<task>.md`, and makes the route async + paths-first by default.
 - **v0.1.2** — one-step per-project setup via `npx chief-of-staff-mcp init` (MCP config + default rule + `.chief/` baseline)
 - **Cursor MCP first.** No claim of support for platforms not yet tested.
 - **Project-level MCP** exercised locally inside a Cursor project Agent.

@@ -1,9 +1,11 @@
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { closeSync, existsSync, openSync } from "node:fs";
+import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
 import { readConfig } from "../lib/config.js";
+import { LOGS_DIR } from "../lib/paths.js";
 import { getTask, readTasks, updateTask } from "../lib/tasks_store.js";
 import type { ChiefConfig, ModelLevel, Task } from "../types.js";
 
@@ -143,24 +145,35 @@ export async function dispatchWorker(rawInput: unknown): Promise<string> {
     return withHint(`派发失败：环境变量 ${envName} 未设置（不在此显示变量值）。`);
   }
 
-  await updateTask(input.task_id, {
-    status: "running",
-    worker_route: "external",
-    provider: providerName,
-    model,
-    started_at: new Date().toISOString(),
-    finished_at: undefined,
-    error: undefined,
-    result_file: undefined,
-    summary: undefined
-  });
-
   const workerScriptPath = resolveWorkerScriptPath();
+  const relativeLogFile = `.chief/logs/${input.task_id}.log`;
+  const logPath = path.join(LOGS_DIR, `${input.task_id}.log`);
+
+  await mkdir(LOGS_DIR, { recursive: true });
+
   if (!existsSync(workerScriptPath)) {
+    const at = new Date().toISOString();
+    await appendFile(
+      logPath,
+      [
+        "=== dispatch failure ===",
+        `task_id=${input.task_id}`,
+        `started_at=${at}`,
+        `cwd=${process.cwd()}`,
+        `worker_script=${workerScriptPath}`,
+        `error=worker script not found`,
+        ""
+      ].join("\n"),
+      "utf-8"
+    );
     await updateTask(input.task_id, {
       status: "failed",
+      worker_route: "external",
+      provider: providerName,
+      model,
       finished_at: new Date().toISOString(),
       error: `worker script not found: ${workerScriptPath}`,
+      log_file: relativeLogFile,
       pid: undefined
     });
     return withHint(
@@ -168,26 +181,81 @@ export async function dispatchWorker(rawInput: unknown): Promise<string> {
     );
   }
 
-  const child = spawn(process.execPath, [workerScriptPath, input.task_id], {
-    detached: true,
-    stdio: ["ignore", "ignore", "ignore"],
-    cwd: process.cwd(),
-    env: process.env
-  });
-  child.on("error", () => {
-    void updateTask(input.task_id, {
-      status: "failed",
-      finished_at: new Date().toISOString(),
-      error: "failed to spawn worker process",
-      pid: undefined
-    });
-  });
-  child.unref();
+  const dispatchStartedAt = new Date().toISOString();
+  await appendFile(
+    logPath,
+    [
+      "=== dispatch start ===",
+      `task_id=${input.task_id}`,
+      `started_at=${dispatchStartedAt}`,
+      `cwd=${process.cwd()}`,
+      `worker_script=${workerScriptPath}`,
+      `provider=${providerName}`,
+      `model=${model}`,
+      `node=${process.execPath}`,
+      ""
+    ].join("\n"),
+    "utf-8"
+  );
 
   await updateTask(input.task_id, {
-    pid: child.pid,
-    log_file: `.chief/logs/${input.task_id}.log`
+    status: "running",
+    worker_route: "external",
+    provider: providerName,
+    model,
+    started_at: dispatchStartedAt,
+    finished_at: undefined,
+    error: undefined,
+    result_file: undefined,
+    summary: undefined,
+    log_file: relativeLogFile
   });
+
+  const logFd = openSync(logPath, "a");
+  let child;
+  try {
+    child = spawn(process.execPath, [workerScriptPath, input.task_id], {
+      detached: true,
+      stdio: ["ignore", logFd, logFd],
+      cwd: process.cwd(),
+      env: process.env
+    });
+  } catch (error) {
+    closeSync(logFd);
+    const message = error instanceof Error ? error.message : String(error);
+    await appendFile(logPath, `\n=== dispatch spawn error ===\n${message}\n`, "utf-8");
+    await updateTask(input.task_id, {
+      status: "failed",
+      finished_at: new Date().toISOString(),
+      error: `failed to spawn worker process: ${message}`,
+      pid: undefined,
+      log_file: relativeLogFile
+    });
+    return withHint(`派发失败：无法启动工兵进程：${message}`);
+  }
+
+  child.unref();
+  closeSync(logFd);
+
+  child.on("error", (err) => {
+    const message = err instanceof Error ? err.message : String(err);
+    void (async () => {
+      await appendFile(logPath, `\n=== dispatch spawn error ===\n${message}\n`, "utf-8");
+      await updateTask(input.task_id, {
+        status: "failed",
+        finished_at: new Date().toISOString(),
+        error: `failed to spawn worker process: ${message}`,
+        pid: undefined,
+        log_file: relativeLogFile
+      });
+    })();
+  });
+
+  await updateTask(input.task_id, {
+    pid: child.pid
+  });
+
+  const relativeResultFile = `.chief/results/${input.task_id}.md`;
 
   return `已派出 ${input.task_id}（**后台运行**，主参谋不需要原地等待）
 
@@ -195,11 +263,12 @@ export async function dispatchWorker(rawInput: unknown): Promise<string> {
 - 工兵路线：external
 - 工兵模型：${providerName} / ${model}
 - pid：${child.pid}
-- log_file：\`.chief/logs/${input.task_id}.log\`
-- 工作脚本：\`${workerScriptPath}\`
+- log_file：\`${relativeLogFile}\`
+- 预期结果文件（完成后写入 \`result_file\`）：\`${relativeResultFile}\`
+- worker_script：\`${workerScriptPath}\`
 
 下一步：
 - 用户可以**继续与主参谋交流**，外部工兵在后台跑。
-- 任务完成后会自动写入 \`.chief/results/${input.task_id}.md\`，并把 \`result_file\` / \`summary\` 写回 task。
+- 任务完成后会自动写入 \`${relativeResultFile}\`，并把 \`result_file\` / \`summary\` 写回 task。
 - 主参谋默认**只读** \`get_worker_status\` / \`get_worker_summary\`（status / summary / result_file / log_file），**不**自动读取完整结果或完整日志，避免吃 token；用户明确要求时再打开 \`result_file\`。`;
 }
